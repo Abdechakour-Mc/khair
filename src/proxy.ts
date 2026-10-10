@@ -11,6 +11,13 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // The Admin view has one reader, who reads English. It is deliberately not
+  // locale-prefixed and never redirected into the public language tree.
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    return NextResponse.next();
+  }
+
   const firstSegment = pathname.split("/")[1];
 
   if (isLocale(firstSegment)) {

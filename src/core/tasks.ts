@@ -188,3 +188,38 @@ export async function getTaskWithSlots(id: string): Promise<OpenTask | null> {
     isFlexible: task.startsAt === null,
   };
 }
+
+/**
+ * Everything the Admin has ever published, with Slot counts: upcoming work
+ * first, then Tasks whose Deadline has passed and which have therefore left
+ * the public list.
+ */
+export async function listTasksForAdmin(now: Date = new Date()): Promise<OpenTask[]> {
+  const { rows } = await db().query<TaskRow & { slots_taken: string }>(
+    `select t.*, coalesce(live.taken, 0) as slots_taken
+       from tasks t
+       left join (
+         select task_id, count(*) as taken
+           from signups
+          where cancelled_at is null
+          group by task_id
+       ) live on live.task_id = t.id
+      order by (t.due_by <= $1),
+               case when t.due_by > $1 then coalesce(t.starts_at, t.due_by) end asc,
+               case when t.due_by <= $1 then coalesce(t.starts_at, t.due_by) end desc`,
+    [now],
+  );
+
+  return rows.map((row) => {
+    const task = toTask(row);
+    const slotsTaken = Number(row.slots_taken);
+    const slotsRemaining = Math.max(0, task.slotsNeeded - slotsTaken);
+    return {
+      ...task,
+      slotsTaken,
+      slotsRemaining,
+      isFull: slotsRemaining === 0,
+      isFlexible: task.startsAt === null,
+    };
+  });
+}

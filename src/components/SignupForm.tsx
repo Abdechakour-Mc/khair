@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { claimSlotAction, type ClaimState } from "@/app/[locale]/task/[id]/actions";
+import { claimSlotAction, type ClaimState } from "@/app/(public)/[locale]/task/[id]/actions";
 import type { Locale } from "@/i18n/config";
 import type { ProblemKey } from "@/i18n/messages";
 

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { isLocale, localeDir, locales } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
-import "../globals.css";
+import "../../globals.css";
 
 // One family carries Latin and Arabic, so the page keeps its voice across a
 // language switch instead of changing character with the script.

@@ -408,3 +408,40 @@ body {
   color: var(--accent);
   border: 1px solid var(--accent);
 }
+
+/* ---- Admin view ---------------------------------------------------- */
+
+.shell-admin {
+  max-width: 640px;
+}
+
+.field textarea {
+  width: 100%;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+
+/* A form submit that reads as a link: sign out is not a primary action. */
+.linkish {
+  min-height: 40px;
+  padding: 0 4px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkish:hover {
+  color: var(--ink);
+}
