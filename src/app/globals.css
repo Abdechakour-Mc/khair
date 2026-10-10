@@ -600,3 +600,88 @@ body {
   padding: 0;
   text-align: start;
 }
+
+/* The motto band: three texts taking turns at the foot of the public pages.
+
+   All three occupy one grid cell, so the band is as tall as the tallest of
+   them and never resizes or nudges the list as they change. The first is
+   opaque without any animation, which is what a browser that ignores the
+   animation shows, and what a reader who has asked for reduced motion gets.
+
+   Each text is in the DOM throughout, so a screen reader reads all three.
+   That is the right outcome here: they are three equally true mottos rather
+   than a carousel of different content. */
+.motto {
+  display: grid;
+  grid-template-areas: "motto";
+  margin-block-start: 40px;
+  padding-block: 24px;
+  border-block-start: 1px solid var(--line);
+  text-align: center;
+}
+
+.motto-item {
+  grid-area: motto;
+  margin: 0;
+  opacity: 0;
+  animation: motto-turn 24s ease-in-out infinite;
+}
+
+/* Visible before any animation runs, and the only one visible without them. */
+.motto-item:first-child {
+  opacity: 1;
+}
+
+.motto-arabic {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.motto-said {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.motto-source {
+  display: block;
+  margin-block-start: 6px;
+  font-size: 12px;
+  font-style: normal;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+@keyframes motto-turn {
+  /* A third of the cycle each, with the fade inside its own share so two
+     texts are never legible at once. */
+  0%,
+  30% {
+    opacity: 1;
+  }
+  36%,
+  94% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* WCAG 2.2.2 wants a way to stop content that moves for more than five
+   seconds. Reduced motion is the real mechanism; hover and focus pause it for
+   anyone who simply wants to finish reading one. A proper pause button would
+   need scripting, which these pages do without. */
+.motto:hover .motto-item,
+.motto:focus-within .motto-item {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motto-item {
+    animation: none;
+  }
+}
