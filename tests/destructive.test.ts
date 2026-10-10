@@ -262,7 +262,8 @@ describe("clearing synthetic data", () => {
     const task = await taskWithBoth();
     await syntheticSignup(task.id);
 
-    expect(await countSyntheticRecords()).toEqual({ signups: 1, volunteers: 1 });
+    // The Task here is a real one, so it is not part of the demo set.
+    expect(await countSyntheticRecords()).toEqual({ signups: 1, volunteers: 1, tasks: 0 });
   });
 
   it("refuses without the exact phrase", async () => {
@@ -272,15 +273,15 @@ describe("clearing synthetic data", () => {
     await expect(clearSyntheticData("clear the demo data")).rejects.toMatchObject({
       reason: "confirmation_mismatch",
     });
-    expect(await countSyntheticRecords()).toEqual({ signups: 1, volunteers: 1 });
+    expect(await countSyntheticRecords()).toEqual({ signups: 1, volunteers: 1, tasks: 0 });
   });
 
   it("deletes every synthetic record", async () => {
     const task = await taskWithBoth();
     await syntheticSignup(task.id);
 
-    expect(await clearSyntheticData(PHRASE)).toEqual({ signups: 1, volunteers: 1 });
-    expect(await countSyntheticRecords()).toEqual({ signups: 0, volunteers: 0 });
+    expect(await clearSyntheticData(PHRASE)).toEqual({ signups: 1, volunteers: 1, tasks: 0 });
+    expect(await countSyntheticRecords()).toEqual({ signups: 0, volunteers: 0, tasks: 0 });
   });
 
   it("leaves every real record untouched", async () => {
@@ -307,7 +308,7 @@ describe("clearing synthetic data", () => {
       [task.id, "+15550201", "Not Synthetic"],
     );
 
-    expect(await countSyntheticRecords()).toEqual({ signups: 0, volunteers: 0 });
+    expect(await countSyntheticRecords()).toEqual({ signups: 0, volunteers: 0, tasks: 0 });
     await clearSyntheticData(PHRASE);
 
     const { rows } = await db().query("select 1 from volunteers where phone = $1", ["+15550201"]);

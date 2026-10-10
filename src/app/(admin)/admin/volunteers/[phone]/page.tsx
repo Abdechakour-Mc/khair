@@ -1,9 +1,11 @@
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { volunteerHistory } from "@/core/signups";
+import { earlyAccessHours, isTrustedVolunteer } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { describeLeadTime, formatShortDate } from "@/view/format";
 import { decodeParam } from "@/view/params";
 import { requireAdminSession } from "../../session";
+import { setVolunteerTrustedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -22,15 +24,19 @@ const OUTCOME_LABEL: Record<string, string> = {
  */
 export default async function VolunteerRecord({
   params,
+  searchParams,
 }: {
   params: Promise<{ phone: string }>;
+  searchParams: Promise<{ problem?: string }>;
 }) {
   await requireAdminSession();
+  const { problem } = await searchParams;
 
   const { phone } = await params;
   // Decoded, but not trusted to be decodable: see decodeParam.
   const e164 = decodeParam(phone);
   const history = await volunteerHistory(e164);
+  const trusted = await isTrustedVolunteer(e164);
   const timeZone = appTimeZone();
 
   return (
@@ -54,6 +60,35 @@ export default async function VolunteerRecord({
           WhatsApp
         </a>
       </p>
+
+      {problem ? (
+        <div className="empty" role="alert">
+          <p>
+            {problem === "signup_missing"
+              ? "Nobody has signed up with that number, so there is nobody to mark yet."
+              : "That did not go through. Nothing was changed."}
+          </p>
+        </div>
+      ) : null}
+
+      {/* Private to you. It appears on no public page, is never shown to the
+          volunteer, and is never added up into a score: all it does is let
+          them see important work first. */}
+      <h2 className="day-heading">Someone you rely on</h2>
+      <div className="empty">
+        <p>
+          {trusted
+            ? `Marked as trusted, so they see important tasks ${earlyAccessHours()} hours before anybody else.`
+            : "Not marked. They see important tasks at the same time as everybody else."}
+        </p>
+        <form action={setVolunteerTrustedAction}>
+          <input type="hidden" name="phone" value={e164} />
+          <input type="hidden" name="trusted" value={trusted ? "false" : "true"} />
+          <button type="submit" className="action action-quiet">
+            {trusted ? "Remove the mark" : "Mark as trusted"}
+          </button>
+        </form>
+      </div>
 
       <h2 className="day-heading">What happened</h2>
       {history.length === 0 ? (

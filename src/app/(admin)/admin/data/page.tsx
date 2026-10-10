@@ -104,8 +104,8 @@ export default async function AdminData({
         </p>
         <p>
           <strong>
-            {synthetic.volunteers} demo volunteers and {synthetic.signups} demo signups are
-            here.
+            {synthetic.volunteers} demo volunteers, {synthetic.signups} demo signups and{" "}
+            {synthetic.tasks} demo tasks are here.
           </strong>
         </p>
         <p className="hint">

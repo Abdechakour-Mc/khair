@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AdminTaskForm } from "@/components/AdminTaskForm";
 import { getTaskWithSlots } from "@/core/tasks";
 import { formatWallTimeInZone } from "@/core/time";
+import { earlyAccessHours } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { requireAdminSession } from "../../../session";
 import { editTaskAction } from "./actions";
@@ -40,6 +41,7 @@ export default async function EditTask({ params }: { params: Promise<{ id: strin
           location: task.location,
           openTo: task.openTo,
           urgent: task.urgent ? "true" : "",
+          important: task.important ? "true" : "",
           startsAt: task.startsAt ? formatWallTimeInZone(task.startsAt, timeZone) : "",
           dueBy: formatWallTimeInZone(task.dueBy, timeZone),
           slotsNeeded: String(task.slotsNeeded),
@@ -47,6 +49,7 @@ export default async function EditTask({ params }: { params: Promise<{ id: strin
         hiddenFields={{ id: task.id }}
         submitLabel="Save changes"
         pendingLabel="Saving"
+        earlyAccessHours={earlyAccessHours()}
         timeZoneLabel={timeZone.replace(/_/g, " ")}
       />
     </>

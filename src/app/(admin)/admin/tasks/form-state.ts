@@ -11,6 +11,7 @@ export type TaskFormValues = {
   openTo: string;
   /** "true" when the box is ticked. An unticked checkbox sends nothing. */
   urgent: string;
+  important: string;
   startsAt: string;
   dueBy: string;
   slotsNeeded: string;

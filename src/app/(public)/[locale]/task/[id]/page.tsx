@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import { CalendarLinks } from "@/components/CalendarLinks";
 import { SignupForm } from "@/components/SignupForm";
 import { readRememberedVolunteer, VOLUNTEER_COOKIE } from "@/core/remembered";
-import { getTaskWithSlots } from "@/core/tasks";
+import { getTaskWithSlots, withheldFrom } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
 import { formatDayHeading, formatShortDate, formatTime, openToLabel } from "@/view/format";
 import { siteOrigin } from "@/view/site";
+import { currentViewer } from "@/view/viewer";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,10 @@ export default async function TaskDetail({
 
   const task = await getTaskWithSlots(id);
   if (!task) notFound();
+  // Withheld work is not found, exactly like work that does not exist. A
+  // page explaining that this is reserved for trusted volunteers would
+  // announce the window to the person it is being kept from.
+  if (withheldFrom(task, await currentViewer())) notFound();
 
   const m = messages[locale];
   const timeZone = appTimeZone();

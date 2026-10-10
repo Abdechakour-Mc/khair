@@ -119,6 +119,7 @@ export default async function AdminTaskList({
                   {task.slotsTaken} of {task.slotsNeeded}
                 </span>
                 {task.urgent ? <span className="spots urgent">Urgent</span> : null}
+                {task.important ? <span className="spots audience">Important</span> : null}
                 {task.openTo === "anyone" ? null : (
                   <span className="spots audience">
                     {task.openTo === "brothers" ? "Brothers" : "Sisters"}

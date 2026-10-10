@@ -15,6 +15,8 @@ export function openTask(overrides: Partial<OpenTask> & { id: string }): OpenTas
     location: "",
     openTo: "anyone",
     urgent: false,
+    important: false,
+    demo: false,
     slotsNeeded: 1,
     closed: false,
     createdAt: new Date("2026-10-01T00:00:00Z"),

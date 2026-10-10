@@ -37,6 +37,10 @@ services:
       # Days are grouped in the mosque's own timezone, not the server's.
       APP_TIMEZONE: America/Toronto
       RETENTION_MONTHS: "6"
+      # How long trusted volunteers see important work before everybody else.
+      EARLY_ACCESS_HOURS: "24"
+      # How long a deleted task can be brought back before the purge finishes it.
+      UNDO_WINDOW_MINUTES: "30"
       CRON_SECRET: local-development-only
       # One deployment, one mosque. See .env.example for why this is config
       # rather than a database entity.

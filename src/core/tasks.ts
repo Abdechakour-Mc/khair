@@ -46,6 +46,17 @@ export type Task = {
    * urgency only ever makes a Task louder and sooner, never narrower.
    */
   urgent: boolean;
+  /**
+   * Withheld from everybody except trusted Volunteers for a window after it
+   * is published, then public like anything else.
+   *
+   * The opposite instruction from `urgent`, which shows a Task to everyone
+   * sooner and louder. A Task can be both, and then the window applies to
+   * whoever can see it.
+   */
+  important: boolean;
+  /** Created by the demo seed, and removed with the rest of the demo data. */
+  demo: boolean;
   /** Present on a fixed Task, absent on a flexible one. */
   startsAt: Date | null;
   /** The Deadline. Always present. */
@@ -88,6 +99,7 @@ export type PublishTaskInput = {
   location?: string;
   openTo?: OpenTo;
   urgent?: boolean;
+  important?: boolean;
   startsAt?: Date | null;
   dueBy: Date;
   slotsNeeded?: number;
@@ -100,6 +112,8 @@ type TaskRow = {
   location: string;
   open_to: OpenTo;
   urgent: boolean;
+  important: boolean;
+  demo: boolean;
   starts_at: Date | null;
   due_by: Date;
   slots_needed: number;
@@ -115,6 +129,8 @@ function toTask(row: TaskRow): Task {
     location: row.location,
     openTo: row.open_to,
     urgent: row.urgent,
+    important: row.important,
+    demo: row.demo,
     startsAt: row.starts_at,
     dueBy: row.due_by,
     slotsNeeded: row.slots_needed,
@@ -175,8 +191,9 @@ export async function publishTask(input: PublishTaskInput): Promise<Task> {
 
   const { rows } = await db().query<TaskRow>(
     `insert into tasks
-       (title, description, location, open_to, urgent, starts_at, due_by, slots_needed)
-     values ($1, $2, $3, $4, $5, $6, $7, $8)
+       (title, description, location, open_to, urgent, important,
+        starts_at, due_by, slots_needed)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      returning *`,
     [
       title,
@@ -184,6 +201,7 @@ export async function publishTask(input: PublishTaskInput): Promise<Task> {
       (input.location ?? "").trim(),
       openTo,
       input.urgent === true,
+      input.important === true,
       startsAt,
       dueBy,
       slotsNeeded,
@@ -209,7 +227,10 @@ export async function getTask(id: string): Promise<Task | null> {
  * in the order they happen, then flexible ones by Deadline. Fully covered
  * Tasks stay in the list, marked, because an empty list reads as a broken page.
  */
-export async function listOpenTasks(now: Date = new Date()): Promise<OpenTask[]> {
+export async function listOpenTasks(
+  now: Date = new Date(),
+  viewer: Viewer = { trusted: false },
+): Promise<OpenTask[]> {
   const { rows } = await db().query<TaskRow & { slots_taken: string }>(
     `select t.*, coalesce(live.taken, 0) as slots_taken
        from tasks t
@@ -222,8 +243,16 @@ export async function listOpenTasks(now: Date = new Date()): Promise<OpenTask[]>
       where t.due_by > $1
         and t.closed = false
         and t.deleted_at is null
+        -- An important Task is left out entirely for everybody else while
+        -- its window runs. Not greyed out and not counted: a list that said
+        -- "1 task hidden" would announce the thing this must not announce.
+        and (
+          $2::boolean
+          or t.important = false
+          or t.created_at <= $1 - ($3 || ' hours')::interval
+        )
       order by (t.starts_at is null), coalesce(t.starts_at, t.due_by), t.created_at`,
-    [now],
+    [now, viewer.trusted, earlyAccessHours()],
   );
 
   return rows.map((row) => {
@@ -373,7 +402,7 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
     const { rows } = await client.query<TaskRow>(
       `update tasks
           set title = $2, description = $3, location = $4, open_to = $5, urgent = $6,
-              starts_at = $7, due_by = $8, slots_needed = $9
+              important = $7, starts_at = $8, due_by = $9, slots_needed = $10
         where id = $1
         returning *`,
       [
@@ -383,6 +412,7 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
         (input.location ?? "").trim(),
         openTo,
         input.urgent === true,
+        input.important === true,
         startsAt,
         dueBy,
         slotsNeeded,
@@ -493,4 +523,75 @@ export async function listDeletedTasks(): Promise<Task[]> {
     [undoWindowMinutes()],
   );
   return rows.map(toTask);
+}
+
+/**
+ * How long the Volunteers the Admin relies on see important work before
+ * everybody else.
+ *
+ * Configuration rather than a constant, because it is a judgement about this
+ * congregation: long enough that the people who always say yes get first
+ * refusal, short enough that nothing sits unclaimed while the mosque waits.
+ */
+export function earlyAccessHours(): number {
+  const configured = Number.parseInt(process.env.EARLY_ACCESS_HOURS ?? "", 10);
+  return Number.isInteger(configured) && configured > 0 ? configured : 24;
+}
+
+/** What the list needs to know about whoever is reading it. */
+export type Viewer = { trusted: boolean };
+
+/**
+ * Whether this Task is being kept back from this viewer right now.
+ *
+ * True only while an important Task is inside its window and the viewer is
+ * not somebody the Admin relies on. The window is measured from publication
+ * and closes on its own, so nothing waits on the Admin remembering to open it
+ * up.
+ *
+ * Convenience and not a boundary. Identity here rests on an unverified phone
+ * number, so this holds only as well as somebody's honesty about their own
+ * number; what it protects is a few hours of first refusal on work that holds
+ * nothing personal, and the Admin can undo any claim. Nothing that matters
+ * may rest on it.
+ */
+export function withheldFrom(
+  task: Pick<Task, "important" | "createdAt">,
+  viewer: Viewer,
+  now: Date = new Date(),
+): boolean {
+  if (!task.important || viewer.trusted) return false;
+  const opensAt = task.createdAt.getTime() + earlyAccessHours() * 60 * 60 * 1000;
+  return now.getTime() < opensAt;
+}
+
+/**
+ * Whether the Admin has marked this number as one they rely on.
+ *
+ * Visible to the Admin alone: it appears on no public page, is never shown to
+ * the Volunteer, and is never aggregated into a score or a rank, for the same
+ * reason there is no leaderboard.
+ */
+export async function isTrustedVolunteer(phone: string): Promise<boolean> {
+  if (!phone) return false;
+  const { rows } = await db().query<{ trusted: boolean }>(
+    "select trusted from volunteers where phone = $1",
+    [phone],
+  );
+  return rows[0]?.trusted === true;
+}
+
+/** The Admin marks somebody as relied upon, or takes that back. */
+export async function setVolunteerTrusted(phone: string, trusted: boolean): Promise<boolean> {
+  const { rows } = await db().query<{ trusted: boolean }>(
+    "update volunteers set trusted = $2 where phone = $1 returning trusted",
+    [phone, trusted],
+  );
+  const row = rows[0];
+  if (!row) {
+    // Trust is about somebody who has actually turned up, so there is nobody
+    // to mark until they have signed up at least once.
+    throw new ConflictError("signup_missing", "Nobody has signed up with that number.");
+  }
+  return row.trusted;
 }

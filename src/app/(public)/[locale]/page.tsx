@@ -3,6 +3,7 @@ import { listOpenTasks, type OpenTask } from "@/core/tasks";
 import { appTimeZone, isLocale, type Locale } from "@/i18n/config";
 import { messages, type Messages } from "@/i18n/messages";
 import { groupIntoAgenda } from "@/view/agenda";
+import { currentViewer } from "@/view/viewer";
 import { formatDayHeading, formatShortDate, formatTime, openToLabel } from "@/view/format";
 
 // The list depends on the current moment, so it is never cached.
@@ -18,7 +19,11 @@ export default async function PublicTaskList({
 
   const m = messages[locale];
   const timeZone = appTimeZone();
-  const groups = groupIntoAgenda(await listOpenTasks(), timeZone);
+  // Important work is left out for everybody else while its window runs.
+  // Nothing on this page says so: no placeholder, no count, nothing to
+  // notice, because the one thing early access must not do is tell somebody
+  // that work was withheld from them.
+  const groups = groupIntoAgenda(await listOpenTasks(new Date(), await currentViewer()), timeZone);
 
   return (
     <>

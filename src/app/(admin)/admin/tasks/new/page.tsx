@@ -1,4 +1,5 @@
 import { AdminTaskForm } from "@/components/AdminTaskForm";
+import { earlyAccessHours } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { requireAdminSession } from "../../session";
 import { publishTaskAction } from "./actions";
@@ -22,6 +23,7 @@ export default async function NewTask() {
         action={publishTaskAction}
         submitLabel="Publish task"
         pendingLabel="Publishing"
+        earlyAccessHours={earlyAccessHours()}
         timeZoneLabel={appTimeZone().replace(/_/g, " ")}
       />
     </>

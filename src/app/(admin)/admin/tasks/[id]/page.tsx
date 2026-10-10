@@ -1,7 +1,14 @@
 import { notFound } from "next/navigation";
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { listSignupsForTask } from "@/core/signups";
-import { getTaskWithSlots, happensAt, hasHappened, undoWindowMinutes } from "@/core/tasks";
+import {
+  earlyAccessHours,
+  getTaskWithSlots,
+  happensAt,
+  hasHappened,
+  undoWindowMinutes,
+  withheldFrom,
+} from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { describeLeadTime, formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { requireAdminSession } from "../../session";
@@ -79,6 +86,24 @@ export default async function AdminTaskDetail({
           <div>
             <dt>Priority</dt>
             <dd>Urgent, pinned to the top of the public list</dd>
+          </div>
+        ) : null}
+        {task.important ? (
+          <div>
+            <dt>Early access</dt>
+            <dd>
+              {withheldFrom(task, { trusted: false })
+                ? `Trusted volunteers only, until ${formatShortDate(
+                    new Date(task.createdAt.getTime() + earlyAccessHours() * 3600000),
+                    "en",
+                    timeZone,
+                  )}, ${formatTime(
+                    new Date(task.createdAt.getTime() + earlyAccessHours() * 3600000),
+                    "en",
+                    timeZone,
+                  )}`
+                : "Finished: this is on the public list for everybody"}
+            </dd>
           </div>
         ) : null}
         {task.openTo === "anyone" ? null : (

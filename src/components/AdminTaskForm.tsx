@@ -18,6 +18,7 @@ export function AdminTaskForm({
   submitLabel,
   pendingLabel,
   timeZoneLabel,
+  earlyAccessHours,
 }: {
   action: (state: TaskFormState, formData: FormData) => Promise<TaskFormState>;
   initial?: TaskFormValues;
@@ -27,6 +28,8 @@ export function AdminTaskForm({
   submitLabel: string;
   pendingLabel: string;
   timeZoneLabel: string;
+  /** How long trusted volunteers get important work to themselves. */
+  earlyAccessHours: number;
 }) {
   const [state, formAction, pending] = useActionState<TaskFormState, FormData>(action, {});
 
@@ -159,6 +162,25 @@ export function AdminTaskForm({
           Urgent
         </label>
         <p className="hint">Pinned to the top of the public list, and marked as urgent.</p>
+      </div>
+
+      {/* The opposite instruction from urgent: this one holds a task back
+          from most people for a while. Nobody is ever told it happened. */}
+      <div className="field field-check">
+        <label htmlFor="important">
+          <input
+            id="important"
+            name="important"
+            type="checkbox"
+            value="true"
+            defaultChecked={v?.important === "true"}
+          />
+          Important
+        </label>
+        <p className="hint">
+          Volunteers you have marked as trusted see it {earlyAccessHours} hours before anybody
+          else. Nobody is told that a task was held back.
+        </p>
       </div>
 
       {formProblem ? (

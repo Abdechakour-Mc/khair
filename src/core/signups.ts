@@ -4,6 +4,7 @@ import { db, inTransaction } from "./db";
 import { ConflictError, ValidationError } from "./errors";
 import { isUuid } from "./ids";
 import { normalizePhone } from "./phone";
+import { withheldFrom } from "./tasks";
 
 export type Signup = {
   id: string;
@@ -79,7 +80,7 @@ export async function claimSlot(input: ClaimSlotInput): Promise<Signup> {
   const phone = normalizePhone(input.phone);
 
   return inTransaction(async (client) => {
-    const task = await lockTaskForClaim(client, input.taskId);
+    const task = await lockTaskForClaim(client, input.taskId, phone);
 
     const { rows: counted } = await client.query<{ taken: string }>(
       "select count(*) as taken from signups where task_id = $1 and cancelled_at is null",
@@ -119,13 +120,19 @@ export async function claimSlot(input: ClaimSlotInput): Promise<Signup> {
 
 type LockedTask = { id: string; slots_needed: number };
 
-async function lockTaskForClaim(client: PoolClient, taskId: string): Promise<LockedTask> {
+async function lockTaskForClaim(
+  client: PoolClient,
+  taskId: string,
+  phone: string,
+): Promise<LockedTask> {
   if (!isUuid(taskId)) {
     throw new ConflictError("task_missing", "That task is no longer listed.");
   }
 
-  const { rows } = await client.query<LockedTask & { closed: boolean; due_by: Date }>(
-    `select id, slots_needed, closed, due_by from tasks
+  const { rows } = await client.query<
+    LockedTask & { closed: boolean; due_by: Date; important: boolean; created_at: Date }
+  >(
+    `select id, slots_needed, closed, due_by, important, created_at from tasks
       where id = $1 and deleted_at is null
         for update`,
     [taskId],
@@ -137,6 +144,21 @@ async function lockTaskForClaim(client: PoolClient, taskId: string): Promise<Loc
   if (task.due_by.getTime() <= Date.now()) {
     throw new ConflictError("task_passed", "This task's deadline has passed.");
   }
+
+  // Early access is checked against the number being claimed with, not
+  // against a cookie, so the gate is at least as good as the identity it
+  // rests on. The refusal is word for word the one for a Task that does not
+  // exist: saying "this is reserved for trusted volunteers" would announce
+  // the window to the person it is being kept from.
+  const { rows: trust } = await client.query<{ trusted: boolean }>(
+    "select trusted from volunteers where phone = $1",
+    [phone],
+  );
+  const viewer = { trusted: trust[0]?.trusted === true };
+  if (withheldFrom({ important: task.important, createdAt: task.created_at }, viewer)) {
+    throw new ConflictError("task_missing", "That task is no longer listed.");
+  }
+
   return { id: task.id, slots_needed: task.slots_needed };
 }
 
