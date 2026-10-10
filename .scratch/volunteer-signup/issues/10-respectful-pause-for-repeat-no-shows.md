@@ -4,11 +4,15 @@
 be quietly paused by the Admin, and quietly unpaused. Nothing is announced,
 nothing is public, and nothing is permanent.
 
-Post-v1, and the last thing in the whole plan. Before building it, ask whether
-the Admin genuinely needs the app to enforce this, or whether having the record
-from ticket 07 is already enough for them to act as a human. A conversation is
-usually the better instrument, and this ticket should be closed unbuilt if that
-turns out to be true.
+Post-v1, and the last thing in the whole plan. **Approved to build** on the
+same terms as ticket 09: synthetic Volunteers and Outcomes make the behaviour
+judgeable before any real history exists, and that data is cleared before the
+app reaches the congregation.
+
+One reservation to carry into the build rather than discard. The record from
+ticket 07 may already be enough for the Admin to act as a human, and a
+conversation is usually the better instrument than a mechanism. Build it, then
+ask whether the Admin actually reaches for it.
 
 **Blocked by:** 09.
 

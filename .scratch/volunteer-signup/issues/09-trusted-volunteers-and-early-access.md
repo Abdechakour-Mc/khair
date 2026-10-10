@@ -10,9 +10,16 @@ the reason the app exists. It is placed after ticket 07 because "trusted" is
 meaningless without Outcome history to base it on, and after ticket 08 because
 retention touches the same tables and doing it first avoids migrating twice.
 
-Before building this, check whether it is still wanted. If months of real
-Outcomes show no-shows are not actually a problem, this ticket should be closed
-unbuilt rather than implemented.
+**This is now approved to build.** The objection was that "trusted" is
+meaningless without Outcome history to base it on, and the answer is synthetic
+history: seed fake Volunteers and Outcomes so the feature can be built and
+judged now, then clear them before the app reaches the congregation.
+
+That makes a demo seed a prerequisite of this ticket, with one hard
+requirement. Synthetic phone numbers must come from **+1 555 01xx**, the block
+NANP reserves for fiction. A fake number can then never collide with a real
+congregant's, and the whole synthetic set is identifiable by pattern and
+removable in one statement. Do not generate realistic-looking numbers.
 
 **Blocked by:** 08.
 
@@ -30,3 +37,8 @@ unbuilt rather than implemented.
 - [ ] Because identity rests on an unverified phone number, early access is
       convenience rather than a security boundary, and nothing that matters may
       depend on it holding
+- [ ] A demo seed creates synthetic Volunteers, Signups and Outcomes using only
+      +1 555 01xx numbers, enough history to make trust judgements legible
+- [ ] A single command removes every synthetic record, and leaves real records
+      untouched
+- [ ] The demo seed refuses to run when NODE_ENV is production
