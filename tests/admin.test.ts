@@ -1,21 +1,17 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mintSession, sessionIsValid, signIn } from "@/core/admin";
 
 const REAL_PASSWORD = "a-real-password-for-the-mosque";
-let savedPassword: string | undefined;
-let savedEnv: string | undefined;
 
 beforeEach(() => {
-  savedPassword = process.env.ADMIN_PASSWORD;
-  savedEnv = process.env.NODE_ENV;
-  process.env.ADMIN_PASSWORD = REAL_PASSWORD;
-  delete process.env.ADMIN_SESSION_SECRET;
+  // stubEnv rather than direct assignment: NODE_ENV is read-only in the
+  // Node types, and vitest restores every stub for us.
+  vi.stubEnv("ADMIN_PASSWORD", REAL_PASSWORD);
+  vi.stubEnv("ADMIN_SESSION_SECRET", "");
 });
 
 afterEach(() => {
-  if (savedPassword === undefined) delete process.env.ADMIN_PASSWORD;
-  else process.env.ADMIN_PASSWORD = savedPassword;
-  if (savedEnv !== undefined) process.env.NODE_ENV = savedEnv;
+  vi.unstubAllEnvs();
 });
 
 describe("signing in with the one shared password", () => {
@@ -38,20 +34,20 @@ describe("signing in with the one shared password", () => {
   });
 
   it("refuses everything when no password is configured", () => {
-    delete process.env.ADMIN_PASSWORD;
+    vi.stubEnv("ADMIN_PASSWORD", "");
     expect(signIn("anything")).toMatchObject({ ok: false });
     expect(signIn("")).toMatchObject({ ok: false });
   });
 
   it("refuses the placeholder password in production", () => {
-    process.env.NODE_ENV = "production";
-    process.env.ADMIN_PASSWORD = "change-me";
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ADMIN_PASSWORD", "change-me");
     expect(signIn("change-me")).toMatchObject({ ok: false, reason: "not_configured" });
   });
 
   it("still allows the placeholder in development, so the app runs locally", () => {
-    process.env.NODE_ENV = "development";
-    process.env.ADMIN_PASSWORD = "change-me";
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("ADMIN_PASSWORD", "change-me");
     expect(signIn("change-me")).toMatchObject({ ok: true });
   });
 });
@@ -88,14 +84,14 @@ describe("the admin session cookie", () => {
     const session = mintSession();
     expect(sessionIsValid(session)).toBe(true);
 
-    process.env.ADMIN_PASSWORD = "a-new-password-after-a-scare";
+    vi.stubEnv("ADMIN_PASSWORD", "a-new-password-after-a-scare");
     expect(sessionIsValid(session)).toBe(false);
   });
 
   it("survives a password change when an explicit signing secret is set", () => {
-    process.env.ADMIN_SESSION_SECRET = "a-stable-signing-secret";
+    vi.stubEnv("ADMIN_SESSION_SECRET", "a-stable-signing-secret");
     const session = mintSession();
-    process.env.ADMIN_PASSWORD = "a-new-password";
+    vi.stubEnv("ADMIN_PASSWORD", "a-new-password");
     expect(sessionIsValid(session)).toBe(true);
   });
 });

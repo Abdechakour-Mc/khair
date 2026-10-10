@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { mosqueIdentity } from "@/config/mosque";
 import { findSignupByCancelToken } from "@/core/signups";
 import { getTaskWithSlots } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
@@ -24,6 +25,7 @@ export default async function SignupConfirmation({
   if (!isLocale(locale)) notFound();
 
   const m = messages[locale];
+  const mosque = mosqueIdentity(locale);
   const signup = await findSignupByCancelToken(token);
 
   if (!signup) {
@@ -77,6 +79,7 @@ export default async function SignupConfirmation({
         <>
           <div className="empty">
             <p>{m.confirmedKeepLink}</p>
+            {mosque.name ? <p className="hint">{m.heldBy(mosque.name)}</p> : null}
           </div>
 
           {/* A plain server action: no client JavaScript, so releasing a Slot

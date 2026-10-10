@@ -46,6 +46,7 @@ export type Messages = {
   releaseSlot: string;
   releasedTitle: string;
   releasedBody: string;
+  heldBy: (organisation: string) => string;
 
   problems: Record<ProblemKey, string>;
 };
@@ -92,6 +93,8 @@ const en: Messages = {
   confirmedUnknownBody:
     "It may already have been used. The current list is on the front page.",
 
+  heldBy: (organisation) =>
+    `${organisation} holds your name and number for this task, and uses them for nothing else.`,
   releaseSlot: "Release my spot",
   releasedTitle: "Your spot is released",
   releasedBody:
@@ -157,6 +160,8 @@ const ar: Messages = {
   confirmedUnknownTitle: "هذا الرابط لا يطابق أي تسجيل",
   confirmedUnknownBody: "قد يكون استُخدم من قبل. القائمة الحالية في الصفحة الرئيسية.",
 
+  heldBy: (organisation) =>
+    `${organisation} يحفظ اسمك ورقمك لهذا العمل فقط، ولا يستخدمهما لغير ذلك.`,
   releaseSlot: "التراجع عن مكاني",
   releasedTitle: "تم التراجع عن مكانك",
   releasedBody: "لم تعد متوقعًا، ولا يُخبر أحد بالسبب. شكرًا لإبلاغك في الوقت المناسب.",
@@ -225,6 +230,8 @@ const fr: Messages = {
   confirmedUnknownBody:
     "Il a peut-être déjà été utilisé. La liste actuelle est sur la page d'accueil.",
 
+  heldBy: (organisation) =>
+    `${organisation} conserve votre nom et votre numéro pour cette tâche uniquement.`,
   releaseSlot: "Libérer ma place",
   releasedTitle: "Votre place est libérée",
   releasedBody:

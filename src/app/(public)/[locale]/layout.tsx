@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic, Outfit } from "next/font/google";
 import { notFound } from "next/navigation";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { mosqueIdentity } from "@/config/mosque";
 import { isLocale, localeDir, locales } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
 import "../../globals.css";
@@ -50,14 +51,22 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   const m = messages[locale];
+  const mosque = mosqueIdentity(locale);
 
   return (
     <html lang={locale} dir={localeDir[locale]} className={`${body.variable} ${display.variable}`}>
       <body>
         <div className="shell">
           <header className="topbar">
-            <a className="wordmark" href={`/${locale}`}>
-              Khair
+            <a className="brand" href={`/${locale}`}>
+              {mosque.logoUrl ? (
+                // Decorative: the name sits right beside it as real text.
+                <img className="brand-logo" src={mosque.logoUrl} alt="" width={36} height={36} />
+              ) : null}
+              <span className="brand-text">
+                <span className="wordmark">Khair</span>
+                {mosque.name ? <span className="brand-org">{mosque.name}</span> : null}
+              </span>
             </a>
             <LocaleSwitcher current={locale} label={m.languageLabel} />
           </header>

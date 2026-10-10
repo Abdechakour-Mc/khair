@@ -2,20 +2,26 @@
    prototyped candidates (see prototypes/task-list-variations.html).
 
    Every box rule uses logical properties, so the Arabic view mirrors without
-   a single direction-specific override. */
+   a single direction-specific override.
+
+   The palette is green because the congregation expects a mosque to be
+   green, and on a page where a stranger types their phone number, meeting
+   an expectation beats being interesting. The dark accent is deliberately
+   much lighter than the light one: the same hue fails contrast on a dark
+   ground. */
 
 :root {
-  --ground: #f1f2ef;
+  --ground: #f1f4f0;
   --surface: #ffffff;
-  --ink: #1f1c19;
-  --muted: #6a635b;
-  --line: #dedfd9;
-  --accent: #b4531f;
+  --ink: #1a1f1b;
+  --muted: #5f6b62;
+  --line: #dbe3dc;
+  --accent: #1f6b45;
   --accent-ink: #ffffff;
-  --accent-soft: #f7e9e0;
-  --covered-ink: #6f6a62;
-  --covered-bg: #e8e9e4;
-  --focus: #b4531f;
+  --accent-soft: #e3efe8;
+  --covered-ink: #67716a;
+  --covered-bg: #e5eae6;
+  --focus: #1f6b45;
 
   --radius: 2px;
   --tap: 48px;
@@ -25,17 +31,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground: #17160f;
-    --surface: #1f1e17;
-    --ink: #efece4;
-    --muted: #a39c8f;
-    --line: #302e25;
-    --accent: #e8915c;
-    --accent-ink: #1b1109;
-    --accent-soft: #332618;
-    --covered-ink: #918b7f;
-    --covered-bg: #272620;
-    --focus: #e8915c;
+    --ground: #121713;
+    --surface: #1a211c;
+    --ink: #e8eee9;
+    --muted: #96a39a;
+    --line: #28322b;
+    --accent: #6fbf92;
+    --accent-ink: #0d1710;
+    --accent-soft: #1d2f24;
+    --covered-ink: #86918a;
+    --covered-bg: #222a24;
+    --focus: #6fbf92;
   }
 }
 
@@ -444,4 +450,39 @@ body {
 
 .linkish:hover {
   color: var(--ink);
+}
+
+/* ---- Mosque identity beside the wordmark --------------------------- */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* The mosque's own mark is a flat raster with a light background, so it gets
+   a permanent light plate rather than disappearing into the dark theme. */
+.brand-logo {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 3px;
+  padding: 2px;
+}
+
+.brand-text {
+  display: grid;
+  gap: 1px;
+}
+
+.brand-org {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--muted);
 }
