@@ -63,14 +63,14 @@ describe("the admin session cookie", () => {
   });
 
   it("rejects a tampered expiry", () => {
-    const session = mintSession();
+    const session = mintSession() ?? "";
     const [, mac] = session.split(".");
     const faked = `${Date.now() + 10 ** 10}.${mac}`;
     expect(sessionIsValid(faked)).toBe(false);
   });
 
   it("rejects a tampered signature", () => {
-    const session = mintSession();
+    const session = mintSession() ?? "";
     const [expires] = session.split(".");
     expect(sessionIsValid(`${expires}.not-a-real-signature`)).toBe(false);
   });
@@ -92,6 +92,48 @@ describe("the admin session cookie", () => {
     vi.stubEnv("ADMIN_SESSION_SECRET", "a-stable-signing-secret");
     const session = mintSession();
     vi.stubEnv("ADMIN_PASSWORD", "a-new-password");
+    expect(sessionIsValid(session)).toBe(true);
+  });
+});
+
+describe("a forged session cannot stand in for a password", () => {
+  it("refuses every session when the placeholder is in use in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ADMIN_PASSWORD", "change-me");
+
+    // The signing key used to fall back to `khair:${ADMIN_PASSWORD}`, so with
+    // the placeholder that ships in .env.example it was the publicly known
+    // string "khair:change-me" and an attacker could mint their own cookie.
+    expect(mintSession()).toBeNull();
+    expect(signIn("change-me")).toMatchObject({ ok: false, reason: "not_configured" });
+
+    // A session minted while the password was real must not survive a
+    // deployment that forgot to set one.
+    vi.stubEnv("ADMIN_PASSWORD", REAL_PASSWORD);
+    const real = mintSession();
+    expect(real).not.toBeNull();
+    vi.stubEnv("ADMIN_PASSWORD", "change-me");
+    expect(sessionIsValid(real)).toBe(false);
+  });
+
+  it("refuses every session when no password is configured at all, in any environment", () => {
+    vi.stubEnv("ADMIN_PASSWORD", "");
+    expect(mintSession()).toBeNull();
+    expect(sessionIsValid("1799999999999.anything")).toBe(false);
+  });
+
+  it("refuses a placeholder signing secret as readily as a placeholder password", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ADMIN_SESSION_SECRET", "change-me");
+    vi.stubEnv("ADMIN_PASSWORD", "change-me");
+    expect(mintSession()).toBeNull();
+  });
+
+  it("still issues sessions in development so the app runs locally", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("ADMIN_PASSWORD", "change-me");
+    const session = mintSession();
+    expect(session).not.toBeNull();
     expect(sessionIsValid(session)).toBe(true);
   });
 });

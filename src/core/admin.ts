@@ -12,16 +12,42 @@ function adminPassword(): string {
   return process.env.ADMIN_PASSWORD ?? "";
 }
 
-/**
- * The signing key is derived from the password unless one is set explicitly,
- * so changing the password signs every existing session out.
- */
-function signingKey(): string {
-  return process.env.ADMIN_SESSION_SECRET || `khair:${adminPassword()}`;
+function isPlaceholder(value: string): boolean {
+  return PLACEHOLDER_PASSWORDS.has(value.trim().toLowerCase());
 }
 
-function sign(payload: string): string {
-  return createHmac("sha256", signingKey()).update(payload).digest("base64url");
+/**
+ * The signing key, or null when there is nothing safe to sign with.
+ *
+ * Derived from the password unless one is set explicitly, so changing the
+ * password signs every existing session out.
+ *
+ * Returning null matters more than it looks. The key used to fall back to
+ * `khair:${ADMIN_PASSWORD}` unconditionally, so with the placeholder that
+ * ships in .env.example the key was the publicly known string
+ * "khair:change-me" and anyone could forge an admin cookie. signIn refused
+ * the placeholder in production, but session validation did not, which made
+ * that refusal cosmetic. Minting and validating now refuse on the same terms
+ * as signing in.
+ */
+function signingKey(): string | null {
+  const explicit = (process.env.ADMIN_SESSION_SECRET ?? "").trim();
+  if (explicit && !isPlaceholder(explicit)) return explicit;
+
+  const password = adminPassword().trim();
+  // No password at all is never signable, in any environment.
+  if (!password) return null;
+  // The shipped placeholder is signable in development only, so the app runs
+  // locally, and never once this is reachable by the congregation.
+  if (isPlaceholder(password) && process.env.NODE_ENV === "production") return null;
+
+  return `khair:${password}`;
+}
+
+function sign(payload: string): string | null {
+  const key = signingKey();
+  if (key === null) return null;
+  return createHmac("sha256", key).update(payload).digest("base64url");
 }
 
 function constantTimeEquals(a: string, b: string): boolean {
@@ -45,7 +71,7 @@ export type SignInResult = { ok: true; session: string } | { ok: false; reason: 
 export function signIn(given: string, now: number = Date.now()): SignInResult {
   const expected = adminPassword();
 
-  if (PLACEHOLDER_PASSWORDS.has(expected.trim().toLowerCase())) {
+  if (isPlaceholder(expected)) {
     if (process.env.NODE_ENV === "production") {
       console.error(
         "ADMIN_PASSWORD is unset or still the placeholder. Set a real password before anyone can reach this app.",
@@ -57,15 +83,22 @@ export function signIn(given: string, now: number = Date.now()): SignInResult {
   if (!expected || !constantTimeEquals(expected, given ?? "")) {
     return { ok: false, reason: "wrong_password" };
   }
-  return { ok: true, session: mintSession(now) };
+
+  const session = mintSession(now);
+  if (session === null) return { ok: false, reason: "not_configured" };
+  return { ok: true, session };
 }
 
-export function mintSession(now: number = Date.now()): string {
+export function mintSession(now: number = Date.now()): string | null {
   const expiresAt = now + SESSION_TTL_MS;
-  return `${expiresAt}.${sign(String(expiresAt))}`;
+  const mac = sign(String(expiresAt));
+  return mac === null ? null : `${expiresAt}.${mac}`;
 }
 
-export function sessionIsValid(value: string | undefined, now: number = Date.now()): boolean {
+export function sessionIsValid(
+  value: string | null | undefined,
+  now: number = Date.now(),
+): boolean {
   if (!value) return false;
 
   const separator = value.lastIndexOf(".");
@@ -76,7 +109,10 @@ export function sessionIsValid(value: string | undefined, now: number = Date.now
 
   const expiresAt = Number(expiresRaw);
   if (!Number.isFinite(expiresAt)) return false;
-  if (!constantTimeEquals(sign(expiresRaw), mac)) return false;
+
+  const expectedMac = sign(expiresRaw);
+  if (expectedMac === null) return false;
+  if (!constantTimeEquals(expectedMac, mac)) return false;
   return expiresAt > now;
 }
 
