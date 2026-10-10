@@ -105,7 +105,9 @@ ask() {
   else
     printf '  %s%s%s ' "$BOLD" "$prompt" "$RESET"
   fi
-  read -r input || true
+  # -e gives readline editing. Without it an arrow key pressed to fix a typo
+  # lands in the value as a raw escape sequence, and ends up on the poster.
+  read -er input || true
   [[ -z "$input" && -n "$current" ]] && input="$current"
   printf -v "$key" '%s' "$input"
 }
@@ -119,8 +121,11 @@ ask_secret() {
   else
     printf '  %s%s%s ' "$BOLD" "$prompt" "$RESET"
   fi
-  read -rs input || true
-  printf '\n'
+  # Hidden input cannot be edited, so an arrow key would be stored as part
+  # of the secret. Ask again rather than keep a password nobody can retype.
+  while read -rs input || true; printf '\n'; [[ "$input" == *$'\e'* ]]; do
+    printf '  %sArrow keys do not work here. Type it again:%s ' "$BOLD" "$RESET"
+  done
   [[ -z "$input" && -n "$current" ]] && input="$current"
   printf -v "$key" '%s' "$input"
 }
