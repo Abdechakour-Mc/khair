@@ -731,6 +731,20 @@ section + section .day-heading,
   transition: border-color 150ms var(--ease), background-color 150ms var(--ease);
 }
 
+/* iOS Safari draws date inputs natively with a minimum width of their own,
+   so width: 100% alone lets them run past the card on a phone. Its value
+   is also centred, unlike every other field on the form. */
+.field input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  display: block;
+}
+
+.field input[type="datetime-local"]::-webkit-date-and-time-value {
+  text-align: start;
+}
+
 .field textarea {
   padding-block: var(--space-3);
   line-height: 1.5;
