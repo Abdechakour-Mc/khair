@@ -136,3 +136,40 @@ export async function findSignupByCancelToken(token: string): Promise<Signup | n
   const row = rows[0];
   return row ? toSignup(row) : null;
 }
+
+/**
+ * A Volunteer releases their own Slot, using the secret in their link.
+ *
+ * Idempotent: releasing an already-released Signup changes nothing and is
+ * reported as success, because the person holding the token is its owner and
+ * a double tap should not look like a failure. An unknown token is refused
+ * with the same reason whether or not it ever existed.
+ */
+export async function releaseSignup(token: string): Promise<Signup> {
+  if (!token) throw new ConflictError("signup_missing", "That link does not match a signup.");
+
+  return inTransaction(async (client) => {
+    const { rows } = await client.query<SignupRow>(
+      "select * from signups where cancel_token = $1 for update",
+      [token],
+    );
+
+    const existing = rows[0];
+    if (!existing) {
+      throw new ConflictError("signup_missing", "That link does not match a signup.");
+    }
+    if (existing.cancelled_at !== null) return toSignup(existing);
+
+    const { rows: updated } = await client.query<SignupRow>(
+      `update signups
+          set outcome = 'cancelled', cancelled_at = now()
+        where id = $1
+        returning *`,
+      [existing.id],
+    );
+
+    const row = updated[0];
+    if (!row) throw new Error("releaseSignup updated no row");
+    return toSignup(row);
+  });
+}

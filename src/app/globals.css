@@ -391,3 +391,20 @@ body {
   color: var(--covered-ink);
   cursor: default;
 }
+
+/* ---- Releasing a Slot ---------------------------------------------- */
+
+.release-form {
+  margin-block-start: 20px;
+}
+
+/* Releasing is the right thing to do when plans change, so the control is
+   plainly available. It is quiet rather than alarming: no red, no warning
+   iconography, nothing that makes withdrawing feel like a confession. */
+.action-quiet {
+  width: 100%;
+  min-height: 52px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}

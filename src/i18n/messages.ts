@@ -43,6 +43,10 @@ export type Messages = {
   confirmedUnknownTitle: string;
   confirmedUnknownBody: string;
 
+  releaseSlot: string;
+  releasedTitle: string;
+  releasedBody: string;
+
   problems: Record<ProblemKey, string>;
 };
 
@@ -88,6 +92,11 @@ const en: Messages = {
   confirmedUnknownBody:
     "It may already have been used. The current list is on the front page.",
 
+  releaseSlot: "Release my spot",
+  releasedTitle: "Your spot is released",
+  releasedBody:
+    "You are no longer expected, and nobody is told why. Thank you for saying so in good time.",
+
   problems: {
     title_required: "Give the task a title.",
     deadline_required: "Set a deadline.",
@@ -103,6 +112,7 @@ const en: Messages = {
     task_closed: "This task has been called off.",
     task_passed: "This task's deadline has passed.",
     task_missing: "That task is no longer listed.",
+    signup_missing: "That link does not match a signup.",
     unknown: "Something went wrong. Please try again.",
   },
 };
@@ -147,6 +157,10 @@ const ar: Messages = {
   confirmedUnknownTitle: "هذا الرابط لا يطابق أي تسجيل",
   confirmedUnknownBody: "قد يكون استُخدم من قبل. القائمة الحالية في الصفحة الرئيسية.",
 
+  releaseSlot: "التراجع عن مكاني",
+  releasedTitle: "تم التراجع عن مكانك",
+  releasedBody: "لم تعد متوقعًا، ولا يُخبر أحد بالسبب. شكرًا لإبلاغك في الوقت المناسب.",
+
   problems: {
     title_required: "أدخل عنوان العمل.",
     deadline_required: "حدّد موعدًا نهائيًا.",
@@ -162,6 +176,7 @@ const ar: Messages = {
     task_closed: "تم إلغاء هذا العمل.",
     task_passed: "انتهى موعد هذا العمل.",
     task_missing: "هذا العمل غير مدرج.",
+    signup_missing: "هذا الرابط لا يطابق أي تسجيل.",
     unknown: "حدث خطأ. حاول مرة أخرى.",
   },
 };
@@ -210,6 +225,11 @@ const fr: Messages = {
   confirmedUnknownBody:
     "Il a peut-être déjà été utilisé. La liste actuelle est sur la page d'accueil.",
 
+  releaseSlot: "Libérer ma place",
+  releasedTitle: "Votre place est libérée",
+  releasedBody:
+    "Vous n'êtes plus attendu, et personne n'en connaît la raison. Merci de l'avoir dit à temps.",
+
   problems: {
     title_required: "Donnez un titre à la tâche.",
     deadline_required: "Indiquez une échéance.",
@@ -225,6 +245,7 @@ const fr: Messages = {
     task_closed: "Cette tâche a été annulée.",
     task_passed: "L'échéance de cette tâche est passée.",
     task_missing: "Cette tâche n'est plus affichée.",
+    signup_missing: "Ce lien ne correspond à aucune inscription.",
     unknown: "Une erreur est survenue. Veuillez réessayer.",
   },
 };

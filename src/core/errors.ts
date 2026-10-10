@@ -33,7 +33,8 @@ export type ConflictReason =
   | "already_signed_up"
   | "task_closed"
   | "task_passed"
-  | "task_missing";
+  | "task_missing"
+  | "signup_missing";
 
 /** The request was sound but the world moved on: a Slot was taken, a Task closed. */
 export class ConflictError extends Error {
