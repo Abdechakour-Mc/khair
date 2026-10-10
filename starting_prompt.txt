@@ -1,0 +1,22 @@
+I'm building "Khair": a simple web app for volunteering at our mosque.
+Core idea: a QR code on a poster opens a page where anyone can see open
+volunteer tasks and sign up on their own, so nobody has to ask a person
+directly and risk an awkward "no". Tasks are either fixed schedule
+(date + time) or flexible (any time before a deadline). An admin can
+see all tasks and who signed up.
+
+Also include a private reliability system for admins only:
+- Each signup ends as done, cancelled early (24h+ ahead, no penalty),
+  or no-show. Admin marks done by default and only flags exceptions.
+- No public points, leaderboard or badges (to avoid riya'). Volunteers
+  see only a private thank-you message.
+- Admin can mark a task "important": trusted volunteers get first access
+  for 24-48h, then it opens to everyone.
+- Repeat no-shows lead to a respectful private pause, reversible by the
+  admin, never a public ban.
+- Volunteers are identified by name + phone number, no password.
+Challenge anything here that is too complex for v1.
+
+Rules: MVP only, mobile-first, no volunteer accounts, as few screens
+as possible. Interview me about anything unclear. Suggest the simplest
+option for each question and challenge me if I'm adding features.

@@ -1,0 +1,622 @@
+<title>Khair Volunteer Board</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap">
+<style>
+  /* ---- Shared foundations -------------------------------------------- */
+  :root {
+    --ui: "IBM Plex Sans Arabic", "Segoe UI", system-ui, sans-serif;
+    --display: "Outfit", "IBM Plex Sans Arabic", system-ui, sans-serif;
+
+    /* default palette = variation A, light */
+    --ground: #f2f3f0;
+    --surface: #ffffff;
+    --ink: #1a1d1a;
+    --muted: #5e655e;
+    --line: #dfe2dd;
+    --accent: #0e5e58;
+    --accent-ink: #ffffff;
+    --accent-soft: #e2eeec;
+    --full-ink: #6b706b;
+    --full-bg: #e9ebe7;
+    --radius: 4px;
+    --shadow: none;
+  }
+
+  :root[data-variant="b"] {
+    --ground: #faf8f3;
+    --surface: #ffffff;
+    --ink: #1b1e24;
+    --muted: #5b6270;
+    --line: #e7e2d8;
+    --accent: #2250a8;
+    --accent-ink: #ffffff;
+    --accent-soft: #e6ecf8;
+    --full-ink: #6d7280;
+    --full-bg: #eeeae2;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgb(27 30 36 / 0.05), 0 8px 24px rgb(27 30 36 / 0.06);
+  }
+
+  :root[data-variant="c"] {
+    --ground: #f1f2ef;
+    --surface: #ffffff;
+    --ink: #1f1c19;
+    --muted: #6a635b;
+    --line: #dedfd9;
+    --accent: #b4531f;
+    --accent-ink: #ffffff;
+    --accent-soft: #f7e9e0;
+    --full-ink: #6f6a62;
+    --full-bg: #e8e9e4;
+    --radius: 2px;
+    --shadow: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #151815;
+      --surface: #1d211d;
+      --ink: #eaeee9;
+      --muted: #9ba39a;
+      --line: #2c322c;
+      --accent: #5bbdb2;
+      --accent-ink: #0d1716;
+      --accent-soft: #1f3330;
+      --full-ink: #8d948c;
+      --full-bg: #242924;
+    }
+    :root:not([data-theme="light"])[data-variant="b"] {
+      --ground: #14161b;
+      --surface: #1c1f26;
+      --ink: #e9ecf2;
+      --muted: #9aa2b2;
+      --line: #2a2f39;
+      --accent: #7fa8f0;
+      --accent-ink: #0e1420;
+      --accent-soft: #1e2635;
+      --full-ink: #8b92a1;
+      --full-bg: #232730;
+    }
+    :root:not([data-theme="light"])[data-variant="c"] {
+      --ground: #17160f;
+      --surface: #1f1e17;
+      --ink: #efece4;
+      --muted: #a39c8f;
+      --line: #302e25;
+      --accent: #e8915c;
+      --accent-ink: #1b1109;
+      --accent-soft: #332618;
+      --full-ink: #918b7f;
+      --full-bg: #272620;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #151815;
+    --surface: #1d211d;
+    --ink: #eaeee9;
+    --muted: #9ba39a;
+    --line: #2c322c;
+    --accent: #5bbdb2;
+    --accent-ink: #0d1716;
+    --accent-soft: #1f3330;
+    --full-ink: #8d948c;
+    --full-bg: #242924;
+  }
+  :root[data-theme="dark"][data-variant="b"] {
+    --ground: #14161b;
+    --surface: #1c1f26;
+    --ink: #e9ecf2;
+    --muted: #9aa2b2;
+    --line: #2a2f39;
+    --accent: #7fa8f0;
+    --accent-ink: #0e1420;
+    --accent-soft: #1e2635;
+    --full-ink: #8b92a1;
+    --full-bg: #232730;
+  }
+  :root[data-theme="dark"][data-variant="c"] {
+    --ground: #17160f;
+    --surface: #1f1e17;
+    --ink: #efece4;
+    --muted: #a39c8f;
+    --line: #302e25;
+    --accent: #e8915c;
+    --accent-ink: #1b1109;
+    --accent-soft: #332618;
+    --full-ink: #918b7f;
+    --full-bg: #272620;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--ui);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .shell {
+    max-width: 560px;
+    margin-inline: auto;
+    padding-inline: 16px;
+    padding-block: 0 48px;
+  }
+
+  /* ---- Prototype control bar (not part of the product) --------------- */
+  .controls {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--ground);
+    border-block-end: 1px solid var(--line);
+    padding-block: 10px;
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+  }
+  .controls-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-inline-end: 2px;
+  }
+  .seg {
+    display: flex;
+    gap: 2px;
+    background: var(--full-bg);
+    border-radius: 999px;
+    padding: 2px;
+  }
+  .seg button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 36px;
+    padding-inline: 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  }
+  .seg button:focus-visible,
+  .signup:focus-visible,
+  .row:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---- Page header --------------------------------------------------- */
+  .masthead { padding-block: 28px 20px; }
+  .masthead h1 {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .masthead p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 44ch;
+  }
+  :root[data-variant="c"] .masthead h1 { font-size: 30px; font-weight: 700; }
+
+  /* ---- Shared pieces ------------------------------------------------- */
+  .spots {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .spots[data-full="true"] { color: var(--full-ink); background: var(--full-bg); }
+
+  .when {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .where { color: var(--muted); }
+
+  .signup {
+    appearance: none;
+    border: 0;
+    font: inherit;
+    font-weight: 600;
+    font-size: 16px;
+    min-height: 52px;
+    padding-inline: 20px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+  .signup:active { transform: translateY(1px); }
+  .signup[disabled] {
+    background: var(--full-bg);
+    color: var(--full-ink);
+    cursor: default;
+  }
+  .signup[disabled]:active { transform: none; }
+
+  /* ---- Variation A: timetable rows ----------------------------------- */
+  .ledger { border-block-start: 1px solid var(--line); }
+  .row {
+    display: grid;
+    grid-template-columns: 76px 1fr auto;
+    gap: 14px;
+    align-items: start;
+    padding-block: 18px;
+    border-block-end: 1px solid var(--line);
+    min-height: 72px;
+    text-align: start;
+    width: 100%;
+    appearance: none;
+    background: transparent;
+    border-inline: 0;
+    border-block-start: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .row-time {
+    font-family: var(--display);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .row-time b { display: block; font-size: 19px; font-weight: 600; }
+  .row-time span { display: block; font-size: 13px; color: var(--muted); }
+  .row-body h2 { margin: 0 0 3px; font-size: 17px; font-weight: 600; }
+  .row-body p { margin: 0; font-size: 14px; color: var(--muted); }
+  .row-end { align-self: center; }
+
+  /* ---- Variation B: cards -------------------------------------------- */
+  .cards { display: grid; gap: 14px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+  .card-top {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-block-end: 12px;
+  }
+  .card h2 {
+    font-family: var(--display);
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  .card p.desc { margin: 0 0 14px; font-size: 15px; color: var(--muted); }
+  .meta { display: grid; gap: 6px; font-size: 15px; margin-block-end: 16px; }
+  .meta div { display: flex; gap: 8px; }
+  .meta dt { color: var(--muted); min-width: 5.5em; }
+  .card .signup { width: 100%; }
+
+  /* ---- Variation C: day agenda --------------------------------------- */
+  .agenda { display: grid; gap: 0; }
+  .day {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-block: 22px 10px;
+    border-block-end: 2px solid var(--accent);
+    margin-block-end: 0;
+  }
+  .slot {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 14px;
+    align-items: center;
+    padding-block: 16px;
+    border-block-end: 1px solid var(--line);
+  }
+  .slot h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .slot .line2 { font-size: 14px; color: var(--muted); }
+  .slot .line2 .when { color: var(--ink); }
+  .slot .signup { min-height: 48px; font-size: 15px; padding-inline: 16px; }
+  .slot-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+
+  .footnote {
+    margin-block-start: 32px;
+    padding-block-start: 16px;
+    border-block-start: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .footnote p { margin: 0 0 8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="shell">
+  <div class="controls">
+    <div class="controls-row">
+      <span class="controls-label" id="vlab">Layout</span>
+      <div class="seg" role="group" aria-labelledby="vlab">
+        <button type="button" id="va" aria-pressed="true">Timetable</button>
+        <button type="button" id="vb" aria-pressed="false">Cards</button>
+        <button type="button" id="vc" aria-pressed="false">Agenda</button>
+      </div>
+      <span class="controls-label" id="llab">Language</span>
+      <div class="seg" role="group" aria-labelledby="llab">
+        <button type="button" id="len" aria-pressed="true">EN</button>
+        <button type="button" id="lar" aria-pressed="false">عربي</button>
+        <button type="button" id="lfr" aria-pressed="false">FR</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="masthead">
+    <h1 id="title">Where help is needed</h1>
+    <p id="subtitle">Pick anything you can manage. Nobody will ask you, and nobody is told what you did not take.</p>
+  </header>
+
+  <main id="list"></main>
+
+  <div class="footnote" id="footnote"></div>
+</div>
+
+<script>
+  var TASKS = [
+    {
+      id: 1, kind: "fixed", day: "fri", dateShort: "17", monShort: "Oct",
+      time: { en: "11:30", ar: "11:30", fr: "11:30" },
+      slots: 3, taken: 2,
+      title: { en: "Jumu'ah hall setup", ar: "تهيئة القاعة ليوم الجمعة", fr: "Préparation de la salle pour Jumu'ah" },
+      desc: { en: "Lay out the rows and carry the dividers through.", ar: "ترتيب الصفوف ونقل الفواصل.", fr: "Disposer les rangées et porter les séparateurs." },
+      place: { en: "Main hall", ar: "القاعة الرئيسية", fr: "Grande salle" }
+    },
+    {
+      id: 2, kind: "fixed", day: "fri", dateShort: "17", monShort: "Oct",
+      time: { en: "after Maghrib", ar: "بعد المغرب", fr: "après le Maghrib" },
+      slots: 2, taken: 0,
+      title: { en: "Qur'an class refreshments", ar: "ضيافة حلقة القرآن", fr: "Collation du cours de Coran" },
+      desc: { en: "Pour tea for the children's circle and clear up after.", ar: "تقديم الشاي لحلقة الأطفال والترتيب بعدها.", fr: "Servir le thé au cercle des enfants puis ranger." },
+      place: { en: "Classroom 2", ar: "قاعة الدرس 2", fr: "Salle de cours 2" }
+    },
+    {
+      id: 3, kind: "fixed", day: "mon", dateShort: "20", monShort: "Oct",
+      time: { en: "09:00", ar: "09:00", fr: "09:00" },
+      slots: 4, taken: 4,
+      title: { en: "Unloading the new carpet rolls", ar: "إنزال لفّات السجاد الجديدة", fr: "Déchargement des rouleaux de tapis" },
+      desc: { en: "Four pairs of hands for about an hour. Heavy lifting.", ar: "أربعة أشخاص لمدة ساعة تقريبًا. حمل ثقيل.", fr: "Quatre personnes pendant environ une heure. Charges lourdes." },
+      place: { en: "Car park", ar: "الموقف", fr: "Parking" }
+    },
+    {
+      id: 4, kind: "fixed", day: "wed", dateShort: "22", monShort: "Oct",
+      time: { en: "after Isha", ar: "بعد العشاء", fr: "après l'Isha" },
+      slots: 2, taken: 0,
+      title: { en: "Wudu area deep clean", ar: "تنظيف منطقة الوضوء", fr: "Nettoyage de l'espace d'ablutions" },
+      desc: { en: "Drains, taps and the floor channels.", ar: "المصارف والصنابير وقنوات الأرضية.", fr: "Siphons, robinets et caniveaux." },
+      place: { en: "Wudu area", ar: "منطقة الوضوء", fr: "Espace d'ablutions" }
+    },
+    {
+      id: 5, kind: "flexible", day: "open", dateShort: "24", monShort: "Oct",
+      time: { en: "before Fri 24 Oct", ar: "قبل 24 أكتوبر", fr: "avant le 24 oct." },
+      slots: 2, taken: 1,
+      title: { en: "Grounds litter pick", ar: "تنظيف الساحة", fr: "Ramassage des déchets dans la cour" },
+      desc: { en: "Any time that suits you. Bags are in the store cupboard.", ar: "في أي وقت يناسبك. الأكياس في المخزن.", fr: "Au moment qui vous convient. Les sacs sont dans le placard." },
+      place: { en: "Grounds", ar: "الساحة", fr: "Cour" }
+    },
+    {
+      id: 6, kind: "flexible", day: "open", dateShort: "26", monShort: "Oct",
+      time: { en: "before Sun 26 Oct", ar: "قبل 26 أكتوبر", fr: "avant le 26 oct." },
+      slots: 1, taken: 0,
+      title: { en: "Shoe rack repair", ar: "إصلاح رفّ الأحذية", fr: "Réparation de l'étagère à chaussures" },
+      desc: { en: "The third shelf has come away from its bracket.", ar: "الرفّ الثالث انفصل عن حاملته.", fr: "La troisième étagère s'est détachée de son support." },
+      place: { en: "Entrance lobby", ar: "المدخل", fr: "Entrée" }
+    }
+  ];
+
+  var T = {
+    en: {
+      title: "Where help is needed",
+      subtitle: "Pick anything you can manage. Nobody will ask you, and nobody is told what you did not take.",
+      layout: "Layout", language: "Language",
+      signup: "Sign up", full: "Fully covered",
+      left: function (n) { return n === 1 ? "1 spot left" : n + " spots left"; },
+      when: "When", where: "Where", needed: "Needed",
+      flexible: "Any time", anytime: "Open",
+      days: { fri: "Friday 17 October", mon: "Monday 20 October", wed: "Wednesday 22 October", open: "No fixed time" },
+      dayShort: { fri: "Fri", mon: "Mon", wed: "Wed", open: "Open" },
+      foot1: "Prototype. Three layouts for the same six Tasks, switchable above. Nothing here saves.",
+      foot2: "In v1 an Admin writes each Task once in one language, so the Arabic and French views would show that original text. Translated here to show the layout holding up in both directions."
+    },
+    ar: {
+      title: "أين تلزم المساعدة",
+      subtitle: "اختر ما تستطيع. لن يسألك أحد، ولا يُخبر أحد بما لم تأخذه.",
+      layout: "التصميم", language: "اللغة",
+      signup: "التسجيل", full: "مكتمل",
+      left: function (n) { return "المتبقي: " + n; },
+      when: "الوقت", where: "المكان", needed: "المطلوب",
+      flexible: "وقت مرن", anytime: "مفتوح",
+      days: { fri: "الجمعة 17 أكتوبر", mon: "الاثنين 20 أكتوبر", wed: "الأربعاء 22 أكتوبر", open: "بلا وقت محدد" },
+      dayShort: { fri: "الجمعة", mon: "الاثنين", wed: "الأربعاء", open: "مفتوح" },
+      foot1: "نموذج أولي. ثلاثة تصاميم لنفس الأعمال الستة، ويمكن التبديل بينها أعلاه. لا شيء هنا يُحفظ.",
+      foot2: "في الإصدار الأول يكتب المسؤول كل عمل مرة واحدة بلغة واحدة، فتظهر هنا نفس الكلمات في كل اللغات. تُرجمت في النموذج لإظهار سلامة التصميم في الاتجاهين."
+    },
+    fr: {
+      title: "Où l'aide est nécessaire",
+      subtitle: "Prenez ce que vous pouvez. Personne ne vous sollicitera, et personne ne saura ce que vous n'avez pas pris.",
+      layout: "Disposition", language: "Langue",
+      signup: "S'inscrire", full: "Complet",
+      left: function (n) { return n === 1 ? "1 place restante" : n + " places restantes"; },
+      when: "Quand", where: "Où", needed: "Besoin",
+      flexible: "Horaire libre", anytime: "Libre",
+      days: { fri: "Vendredi 17 octobre", mon: "Lundi 20 octobre", wed: "Mercredi 22 octobre", open: "Sans horaire fixe" },
+      dayShort: { fri: "Ven.", mon: "Lun.", wed: "Mer.", open: "Libre" },
+      foot1: "Prototype. Trois dispositions pour les six mêmes tâches, au choix ci-dessus. Rien n'est enregistré.",
+      foot2: "En v1, l'administrateur rédige chaque tâche une seule fois dans une seule langue : les vues arabe et française afficheraient ce texte d'origine. Traduit ici pour montrer que la disposition tient dans les deux sens."
+    }
+  };
+
+  var lang = "en";
+  var variant = "a";
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function remaining(t) { return t.slots - t.taken; }
+
+  function spotsEl(t) {
+    var n = remaining(t);
+    var txt = n === 0 ? T[lang].full : T[lang].left(n);
+    return '<span class="spots" data-full="' + (n === 0) + '">' + esc(txt) + "</span>";
+  }
+
+  function signupEl(t) {
+    var n = remaining(t);
+    if (n === 0) {
+      return '<button type="button" class="signup" disabled>' + esc(T[lang].full) + "</button>";
+    }
+    return '<button type="button" class="signup">' + esc(T[lang].signup) + "</button>";
+  }
+
+  /* Variation A: a prayer-timetable style ledger. Time lives in its own
+     inline-start column so the whole week scans vertically. */
+  function renderLedger() {
+    var out = '<div class="ledger">';
+    TASKS.forEach(function (t) {
+      out +=
+        '<button type="button" class="row">' +
+          '<span class="row-time">' +
+            "<b>" + esc(t.kind === "flexible" ? T[lang].anytime : T[lang].dayShort[t.day]) + "</b>" +
+            "<span>" + esc(t.kind === "flexible" ? t.dateShort + " " + t.monShort : t.time[lang]) + "</span>" +
+          "</span>" +
+          '<span class="row-body">' +
+            "<h2>" + esc(t.title[lang]) + "</h2>" +
+            "<p>" + esc(t.place[lang]) + "</p>" +
+          "</span>" +
+          '<span class="row-end">' + spotsEl(t) + "</span>" +
+        "</button>";
+    });
+    return out + "</div>";
+  }
+
+  /* Variation B: one roomy card per Task, every field labelled, full-width
+     action. Most forgiving layout for an unpractised reader. */
+  function renderCards() {
+    var out = '<div class="cards">';
+    TASKS.forEach(function (t) {
+      var when = t.kind === "flexible" ? T[lang].flexible + ", " + t.time[lang] : T[lang].dayShort[t.day] + " " + t.dateShort + " " + t.monShort + ", " + t.time[lang];
+      out +=
+        '<article class="card">' +
+          '<div class="card-top"><h2>' + esc(t.title[lang]) + "</h2>" + spotsEl(t) + "</div>" +
+          '<p class="desc">' + esc(t.desc[lang]) + "</p>" +
+          '<dl class="meta">' +
+            "<div><dt>" + esc(T[lang].when) + '</dt><dd class="when">' + esc(when) + "</dd></div>" +
+            "<div><dt>" + esc(T[lang].where) + '</dt><dd class="where">' + esc(t.place[lang]) + "</dd></div>" +
+            "<div><dt>" + esc(T[lang].needed) + "</dt><dd>" + esc(t.slots) + "</dd></div>" +
+          "</dl>" +
+          signupEl(t) +
+        "</article>";
+    });
+    return out + "</div>";
+  }
+
+  /* Variation C: grouped under the day it happens, flexible Tasks collected
+     at the end. Closest to how a notice board is actually read. */
+  function renderAgenda() {
+    var order = ["fri", "mon", "wed", "open"];
+    var out = '<div class="agenda">';
+    order.forEach(function (d) {
+      var group = TASKS.filter(function (t) { return t.day === d; });
+      if (!group.length) return;
+      out += '<h2 class="day">' + esc(T[lang].days[d]) + "</h2>";
+      group.forEach(function (t) {
+        out +=
+          '<div class="slot">' +
+            "<div>" +
+              '<div class="slot-head"><h2>' + esc(t.title[lang]) + "</h2>" + spotsEl(t) + "</div>" +
+              '<div class="line2"><span class="when">' + esc(t.time[lang]) + "</span> &middot; " + esc(t.place[lang]) + "</div>" +
+            "</div>" +
+            signupEl(t) +
+          "</div>";
+      });
+    });
+    return out + "</div>";
+  }
+
+  function render() {
+    var root = document.documentElement;
+    root.setAttribute("data-variant", variant);
+    root.lang = lang === "ar" ? "ar" : lang;
+    root.dir = lang === "ar" ? "rtl" : "ltr";
+
+    document.getElementById("title").textContent = T[lang].title;
+    document.getElementById("subtitle").textContent = T[lang].subtitle;
+    document.getElementById("vlab").textContent = T[lang].layout;
+    document.getElementById("llab").textContent = T[lang].language;
+
+    document.getElementById("list").innerHTML =
+      variant === "a" ? renderLedger() : variant === "b" ? renderCards() : renderAgenda();
+
+    document.getElementById("footnote").innerHTML =
+      "<p>" + esc(T[lang].foot1) + "</p><p>" + esc(T[lang].foot2) + "</p>";
+
+    [["va", "a"], ["vb", "b"], ["vc", "c"]].forEach(function (p) {
+      document.getElementById(p[0]).setAttribute("aria-pressed", String(variant === p[1]));
+    });
+    [["len", "en"], ["lar", "ar"], ["lfr", "fr"]].forEach(function (p) {
+      document.getElementById(p[0]).setAttribute("aria-pressed", String(lang === p[1]));
+    });
+  }
+
+  [["va", "a"], ["vb", "b"], ["vc", "c"]].forEach(function (p) {
+    document.getElementById(p[0]).addEventListener("click", function () {
+      variant = p[1];
+      try { localStorage.setItem("khair-variant", variant); } catch (e) {}
+      render();
+    });
+  });
+  [["len", "en"], ["lar", "ar"], ["lfr", "fr"]].forEach(function (p) {
+    document.getElementById(p[0]).addEventListener("click", function () {
+      lang = p[1];
+      try { localStorage.setItem("khair-lang", lang); } catch (e) {}
+      render();
+    });
+  });
+
+  try {
+    var sv = localStorage.getItem("khair-variant");
+    var sl = localStorage.getItem("khair-lang");
+    if (sv === "a" || sv === "b" || sv === "c") variant = sv;
+    if (sl === "en" || sl === "ar" || sl === "fr") lang = sl;
+  } catch (e) {}
+
+  render();
+</script>

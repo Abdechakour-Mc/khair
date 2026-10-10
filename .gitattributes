@@ -1,0 +1,7 @@
+# The app runs in Linux containers while the working copy lives on Windows.
+# Normalise to LF in the repository so shell scripts and SQL behave the same
+# in both places.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

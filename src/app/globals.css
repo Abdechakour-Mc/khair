@@ -1,0 +1,274 @@
+/* Khair's public pages. Day-grouped agenda layout, chosen from three
+   prototyped candidates (see prototypes/task-list-variations.html).
+
+   Every box rule uses logical properties, so the Arabic view mirrors without
+   a single direction-specific override. */
+
+:root {
+  --ground: #f1f2ef;
+  --surface: #ffffff;
+  --ink: #1f1c19;
+  --muted: #6a635b;
+  --line: #dedfd9;
+  --accent: #b4531f;
+  --accent-ink: #ffffff;
+  --accent-soft: #f7e9e0;
+  --covered-ink: #6f6a62;
+  --covered-bg: #e8e9e4;
+  --focus: #b4531f;
+
+  --radius: 2px;
+  --tap: 48px;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #17160f;
+    --surface: #1f1e17;
+    --ink: #efece4;
+    --muted: #a39c8f;
+    --line: #302e25;
+    --accent: #e8915c;
+    --accent-ink: #1b1109;
+    --accent-soft: #332618;
+    --covered-ink: #918b7f;
+    --covered-bg: #272620;
+    --focus: #e8915c;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body), "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.shell {
+  max-width: 560px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block: 0 56px;
+}
+
+/* ---- Header and language switcher --------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 12px;
+  border-block-end: 1px solid var(--line);
+}
+
+.wordmark {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.langs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.langs a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 44px;
+  padding-inline: 10px;
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.langs a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ---- Page heading -------------------------------------------------- */
+
+.masthead {
+  padding-block: 28px 8px;
+}
+
+.masthead h1 {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 46ch;
+}
+
+/* ---- Agenda -------------------------------------------------------- */
+
+.day-heading {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+  padding-block: 26px 10px;
+  border-block-end: 2px solid var(--accent);
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 14px;
+  align-items: center;
+  padding-block: 16px;
+  border-block-end: 1px solid var(--line);
+}
+
+.slot-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+}
+
+.slot h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.slot .detail {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.slot .when {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot .note {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.spots {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.spots.covered {
+  color: var(--covered-ink);
+  background: var(--covered-bg);
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding-inline: 18px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action:active {
+  transform: translateY(1px);
+}
+
+.action[aria-disabled="true"] {
+  background: var(--covered-bg);
+  color: var(--covered-ink);
+  cursor: default;
+  pointer-events: none;
+  transform: none;
+}
+
+/* ---- Empty state --------------------------------------------------- */
+
+.empty {
+  margin-block-start: 28px;
+  padding: 24px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.empty h2 {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.empty p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+  .action:active {
+    transform: none;
+  }
+}
