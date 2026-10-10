@@ -75,6 +75,12 @@ export default async function AdminTaskDetail({
             <dd>{task.location}</dd>
           </div>
         ) : null}
+        {task.urgent ? (
+          <div>
+            <dt>Priority</dt>
+            <dd>Urgent, pinned to the top of the public list</dd>
+          </div>
+        ) : null}
         {task.openTo === "anyone" ? null : (
           <div>
             <dt>Who it is for</dt>

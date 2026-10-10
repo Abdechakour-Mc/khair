@@ -15,6 +15,10 @@ export default async function AdminTaskList() {
 
   const upcoming = tasks.filter((task) => task.dueBy.getTime() > now);
   const past = tasks.filter((task) => task.dueBy.getTime() <= now);
+  // Said plainly so the Admin can judge whether the word still means
+  // anything. Not a cap and not a warning: every task feels urgent to the
+  // person publishing it, and the only useful check is being able to see it.
+  const urgent = upcoming.filter((task) => task.urgent).length;
 
   return (
     <>
@@ -33,6 +37,7 @@ export default async function AdminTaskList() {
           {upcoming.length === 0
             ? "Nothing is published for the days ahead."
             : `${upcoming.length} published for the days ahead.`}
+          {urgent > 0 ? ` ${urgent} marked urgent.` : null}
         </p>
       </div>
 
@@ -58,6 +63,7 @@ export default async function AdminTaskList() {
                 <span className={task.isFull ? "spots covered" : "spots"}>
                   {task.slotsTaken} of {task.slotsNeeded}
                 </span>
+                {task.urgent ? <span className="spots urgent">Urgent</span> : null}
                 {task.openTo === "anyone" ? null : (
                   <span className="spots audience">
                     {task.openTo === "brothers" ? "Brothers" : "Sisters"}

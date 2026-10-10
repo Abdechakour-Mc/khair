@@ -9,6 +9,8 @@ export type TaskFormValues = {
   location: string;
   /** One of the Task's `openTo` values. Empty means the Admin left it alone. */
   openTo: string;
+  /** "true" when the box is ticked. An unticked checkbox sends nothing. */
+  urgent: string;
   startsAt: string;
   dueBy: string;
   slotsNeeded: string;

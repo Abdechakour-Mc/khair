@@ -1,30 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { OpenTask } from "@/core/tasks";
 import { dayKey, groupIntoAgenda } from "@/view/agenda";
+import { openTask as task } from "./helpers/task";
 
 const MONTREAL = "America/Toronto";
-
-function task(overrides: Partial<OpenTask> & { id: string }): OpenTask {
-  const startsAt = overrides.startsAt ?? null;
-  const dueBy = overrides.dueBy ?? new Date("2026-10-17T20:00:00Z");
-  return {
-    title: "Task",
-    description: "",
-    location: "",
-    openTo: "anyone",
-    slotsNeeded: 1,
-    closed: false,
-    createdAt: new Date("2026-10-01T00:00:00Z"),
-    slotsTaken: 0,
-    slotsRemaining: 1,
-    isFull: false,
-    ...overrides,
-    id: overrides.id,
-    startsAt,
-    dueBy,
-    isFlexible: startsAt === null,
-  };
-}
 
 describe("grouping the public list into an agenda", () => {
   it("puts Tasks that share a day under one heading", async () => {

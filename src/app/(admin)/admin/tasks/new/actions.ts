@@ -25,6 +25,7 @@ export async function publishTaskAction(
       description: values.description,
       location: values.location,
       openTo: readOpenTo(values),
+      urgent: values.urgent === "true",
       startsAt: times.startsAt,
       dueBy: times.dueBy,
       slotsNeeded: readSlotsNeeded(values),

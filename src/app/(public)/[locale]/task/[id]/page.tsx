@@ -40,6 +40,7 @@ export default async function TaskDetail({
 
       <div className="masthead">
         <h1>{task.title}</h1>
+        {task.urgent ? <p className="urgent-note">{m.urgentMark}</p> : null}
         {task.description ? <p>{task.description}</p> : null}
       </div>
 

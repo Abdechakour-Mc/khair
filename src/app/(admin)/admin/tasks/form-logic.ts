@@ -29,6 +29,7 @@ export function readTaskForm(formData: FormData): TaskFormValues {
     description: String(formData.get("description") ?? ""),
     location: String(formData.get("location") ?? ""),
     openTo: String(formData.get("openTo") ?? ""),
+    urgent: formData.get("urgent") === "true" ? "true" : "",
     startsAt: String(formData.get("startsAt") ?? ""),
     dueBy: String(formData.get("dueBy") ?? ""),
     slotsNeeded: String(formData.get("slotsNeeded") ?? "1"),

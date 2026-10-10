@@ -36,7 +36,9 @@ export default async function PublicTaskList({
         groups.map((group) => (
           <section key={group.key}>
             <h2 className="day-heading">
-              {group.kind === "day" ? (
+              {group.kind === "urgent" ? (
+                m.urgentHeading
+              ) : group.kind === "day" ? (
                 // The group's own key: the calendar day in the mosque's
                 // timezone, which is the day the heading beside it reads. The
                 // UTC instant named a different day for an evening Task.
@@ -48,7 +50,16 @@ export default async function PublicTaskList({
               )}
             </h2>
             {group.tasks.map((task) => (
-              <Slot key={task.id} task={task} locale={locale} timeZone={timeZone} m={m} />
+              <Slot
+                key={task.id}
+                task={task}
+                locale={locale}
+                timeZone={timeZone}
+                m={m}
+                // Pinned Tasks are shown away from their day heading, so the
+                // card has to carry the day itself.
+                withDay={group.kind === "urgent"}
+              />
             ))}
           </section>
         ))
@@ -62,14 +73,18 @@ function Slot({
   locale,
   timeZone,
   m,
+  withDay = false,
 }: {
   task: OpenTask;
   locale: Locale;
   timeZone: string;
   m: Messages;
+  withDay?: boolean;
 }) {
   const when = task.startsAt
-    ? formatTime(task.startsAt, locale, timeZone)
+    ? withDay
+      ? `${formatDayHeading(task.startsAt, locale, timeZone)}, ${formatTime(task.startsAt, locale, timeZone)}`
+      : formatTime(task.startsAt, locale, timeZone)
     : m.before(formatShortDate(task.dueBy, locale, timeZone));
   const audience = openToLabel(task.openTo, m);
 
@@ -78,6 +93,9 @@ function Slot({
       <div>
         <div className="slot-head">
           <h2>{task.title}</h2>
+          {/* Marked as well as moved, so the reason it is at the top of the
+              page is legible rather than mysterious. */}
+          {task.urgent ? <span className="spots urgent">{m.urgentMark}</span> : null}
           <span className={task.isFull ? "spots covered" : "spots"}>
             {task.isFull ? m.fullyCovered : m.spotsLeft(task.slotsRemaining)}
           </span>

@@ -26,6 +26,8 @@ export type Messages = {
   openToLabel: string;
   openToBrothers: string;
   openToSisters: string;
+  urgentHeading: string;
+  urgentMark: string;
   helpersNeeded: (count: number) => string;
 
   nameLabel: string;
@@ -78,6 +80,8 @@ const en: Messages = {
   openToLabel: "Who it is for",
   openToBrothers: "Brothers",
   openToSisters: "Sisters",
+  urgentHeading: "Needed now",
+  urgentMark: "Urgent",
   helpersNeeded: (count) => (count === 1 ? "1 helper" : `${count} helpers`),
 
   nameLabel: "Your name",
@@ -155,6 +159,8 @@ const ar: Messages = {
   openToLabel: "لمن هذا العمل",
   openToBrothers: "للإخوة",
   openToSisters: "للأخوات",
+  urgentHeading: "مطلوب الآن",
+  urgentMark: "عاجل",
   helpersNeeded: (count) => `${count}`,
 
   nameLabel: "اسمك",
@@ -232,6 +238,8 @@ const fr: Messages = {
   openToLabel: "Pour qui",
   openToBrothers: "Frères",
   openToSisters: "Sœurs",
+  urgentHeading: "À faire maintenant",
+  urgentMark: "Urgent",
   helpersNeeded: (count) => (count === 1 ? "1 personne" : `${count} personnes`),
 
   nameLabel: "Votre nom",

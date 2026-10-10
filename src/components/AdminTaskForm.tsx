@@ -144,6 +144,23 @@ export function AdminTaskForm({
         ) : null}
       </div>
 
+      {/* Pins the task to the top of the public list and marks it there.
+          Only useful while it stays rare, which is the Admin's judgement to
+          make: nothing here counts or caps it. */}
+      <div className="field field-check">
+        <label htmlFor="urgent">
+          <input
+            id="urgent"
+            name="urgent"
+            type="checkbox"
+            value="true"
+            defaultChecked={v?.urgent === "true"}
+          />
+          Urgent
+        </label>
+        <p className="hint">Pinned to the top of the public list, and marked as urgent.</p>
+      </div>
+
       {formProblem ? (
         <p className="problem problem-block" role="alert">
           {formProblem}

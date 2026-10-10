@@ -12,7 +12,7 @@ thing that cannot wait.
 
 **Blocked by:** None.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Not the same flag as ticket 09's "important"
 
@@ -43,20 +43,20 @@ Deliberately not built: a priority scale, numeric weights, or sorting by
 anything other than urgent-then-when. Three levels of priority is a scale
 nobody calibrates the same way twice.
 
-- [ ] The Admin can mark a Task urgent when publishing, and change it when
+- [x] The Admin can mark a Task urgent when publishing, and change it when
       editing
-- [ ] An urgent Task is pinned above the day-by-day list on the public page
-- [ ] It is visibly marked as urgent, not just moved, so the reason it is at
+- [x] An urgent Task is pinned above the day-by-day list on the public page
+- [x] It is visibly marked as urgent, not just moved, so the reason it is at
       the top is legible
-- [ ] An urgent Task appears once, not in both the pinned section and its own
+- [x] An urgent Task appears once, not in both the pinned section and its own
       day
-- [ ] A pinned Task still says when it happens, since it is shown away from
+- [x] A pinned Task still says when it happens, since it is shown away from
       its day heading
-- [ ] Several urgent Tasks are ordered among themselves by when they happen,
+- [x] Several urgent Tasks are ordered among themselves by when they happen,
       soonest first
-- [ ] Nothing is urgent by default, and a Task that is full still shows as
+- [x] Nothing is urgent by default, and a Task that is full still shows as
       full rather than pinned and unclaimable-looking
-- [ ] The marking is translated in all three languages
-- [ ] The Admin's Task list shows which Tasks are urgent and how many
-- [ ] Covered at the core seam: the grouping puts urgent first, excludes those
+- [x] The marking is translated in all three languages
+- [x] The Admin's Task list shows which Tasks are urgent and how many
+- [x] Covered at the core seam: the grouping puts urgent first, excludes those
       Tasks from their day groups, and orders them by when they happen

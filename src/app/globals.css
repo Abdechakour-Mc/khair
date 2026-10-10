@@ -21,6 +21,11 @@
   --accent-soft: #e3efe8;
   --covered-ink: #67716a;
   --covered-bg: #e5eae6;
+  /* Urgent work. A warm hue against a page that is otherwise entirely green,
+     so the pin reads at a glance without a second green pill competing with
+     the spot count. Both pairs clear 4.5:1 on their own ground. */
+  --urgent-ink: #8a2b12;
+  --urgent-bg: #fbe6de;
   --focus: #1f6b45;
 
   --radius: 2px;
@@ -41,6 +46,8 @@
     --accent-soft: #1d2f24;
     --covered-ink: #86918a;
     --covered-bg: #222a24;
+    --urgent-ink: #ffb79e;
+    --urgent-bg: #3b2018;
     --focus: #6fbf92;
   }
 }
@@ -215,6 +222,39 @@ body {
 .spots.covered {
   color: var(--covered-ink);
   background: var(--covered-bg);
+}
+
+.spots.urgent {
+  color: var(--urgent-ink);
+  background: var(--urgent-bg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* The same mark on the task's own page, where there is no row of pills to
+   sit in. */
+.urgent-note {
+  margin: 0 0 8px;
+  color: var(--urgent-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* A checkbox reads as one line, not as a label above a field. */
+.field-check label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  font-weight: 500;
+}
+
+.field-check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
 }
 
 /* Who the work is for. Outlined rather than filled: it sits beside the spot

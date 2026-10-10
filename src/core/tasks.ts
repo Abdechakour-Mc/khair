@@ -22,6 +22,15 @@ export type Task = {
   location: string;
   /** Who the work is for. `anyone` unless the Admin said otherwise. */
   openTo: OpenTo;
+  /**
+   * Pinned to the top of the public list, and marked there.
+   *
+   * A flag and not a scale: three levels of priority is a scale nobody
+   * calibrates the same way twice. Nothing withholds an urgent Task from
+   * anybody - that is the separate `important` flag for early access - so
+   * urgency only ever makes a Task louder and sooner, never narrower.
+   */
+  urgent: boolean;
   /** Present on a fixed Task, absent on a flexible one. */
   startsAt: Date | null;
   /** The Deadline. Always present. */
@@ -63,6 +72,7 @@ export type PublishTaskInput = {
   description?: string;
   location?: string;
   openTo?: OpenTo;
+  urgent?: boolean;
   startsAt?: Date | null;
   dueBy: Date;
   slotsNeeded?: number;
@@ -74,6 +84,7 @@ type TaskRow = {
   description: string;
   location: string;
   open_to: OpenTo;
+  urgent: boolean;
   starts_at: Date | null;
   due_by: Date;
   slots_needed: number;
@@ -88,6 +99,7 @@ function toTask(row: TaskRow): Task {
     description: row.description,
     location: row.location,
     openTo: row.open_to,
+    urgent: row.urgent,
     startsAt: row.starts_at,
     dueBy: row.due_by,
     slotsNeeded: row.slots_needed,
@@ -147,14 +159,16 @@ export async function publishTask(input: PublishTaskInput): Promise<Task> {
   const openTo = requireOpenTo(input.openTo);
 
   const { rows } = await db().query<TaskRow>(
-    `insert into tasks (title, description, location, open_to, starts_at, due_by, slots_needed)
-     values ($1, $2, $3, $4, $5, $6, $7)
+    `insert into tasks
+       (title, description, location, open_to, urgent, starts_at, due_by, slots_needed)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)
      returning *`,
     [
       title,
       (input.description ?? "").trim(),
       (input.location ?? "").trim(),
       openTo,
+      input.urgent === true,
       startsAt,
       dueBy,
       slotsNeeded,
@@ -337,8 +351,8 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
 
     const { rows } = await client.query<TaskRow>(
       `update tasks
-          set title = $2, description = $3, location = $4, open_to = $5,
-              starts_at = $6, due_by = $7, slots_needed = $8
+          set title = $2, description = $3, location = $4, open_to = $5, urgent = $6,
+              starts_at = $7, due_by = $8, slots_needed = $9
         where id = $1
         returning *`,
       [
@@ -347,6 +361,7 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
         (input.description ?? "").trim(),
         (input.location ?? "").trim(),
         openTo,
+        input.urgent === true,
         startsAt,
         dueBy,
         slotsNeeded,
