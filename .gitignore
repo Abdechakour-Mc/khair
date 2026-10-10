@@ -14,6 +14,8 @@ Thumbs.db
 # Screenshots taken while checking the UI, never committed.
 .shots/
 
-# A containerised chromium once wrote its profile here as a literal
-# Windows-looking directory. Never ours.
-C:/
+# Git Bash rewrites a container -e HOME=/tmp into a Windows path, so
+# chromium writes its profile into the bind mount under a directory named
+# with a private-use stand-in for the illegal colon. Pass MSYS_NO_PATHCONV=1
+# to avoid it; ignored here so it can never be committed again.
+C/
