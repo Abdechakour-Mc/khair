@@ -12,6 +12,30 @@ export function retentionMonths(): number {
 }
 
 /**
+ * The moment before which Signups are forgotten: `months` back from `now`.
+ *
+ * The day is clamped before the month is shifted, because `setUTCMonth`
+ * overflows. Run on 31 August with a six-month window, "28 February + 3
+ * days" lands on 3 March, and Signups from 1 and 2 March would be deleted
+ * after five months and twenty-nine days. The stated policy is six months,
+ * so a month shorter than the current one lands on its last day instead.
+ */
+export function retentionCutoff(now: Date, months: number): Date {
+  const cutoff = new Date(now);
+  const day = cutoff.getUTCDate();
+
+  cutoff.setUTCDate(1);
+  cutoff.setUTCMonth(cutoff.getUTCMonth() - months);
+
+  const lastDayOfThatMonth = new Date(
+    Date.UTC(cutoff.getUTCFullYear(), cutoff.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  cutoff.setUTCDate(Math.min(day, lastDayOfThatMonth));
+
+  return cutoff;
+}
+
+/**
  * Forgets names, phone numbers and Outcomes some months after the work is
  * done, so Khair does not quietly accumulate a dossier on the congregation.
  *
@@ -28,8 +52,7 @@ export async function purgeExpiredSignups(
   now: Date = new Date(),
   months: number = retentionMonths(),
 ): Promise<PurgeResult> {
-  const cutoff = new Date(now);
-  cutoff.setUTCMonth(cutoff.getUTCMonth() - months);
+  const cutoff = retentionCutoff(now, months);
 
   return inTransaction(async (client) => {
     const signups = await client.query(

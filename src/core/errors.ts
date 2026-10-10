@@ -35,6 +35,7 @@ export type ConflictReason =
   | "task_closed"
   | "task_passed"
   | "task_missing"
+  | "task_happened"
   | "signup_missing"
   | "signup_released";
 

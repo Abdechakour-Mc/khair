@@ -3,8 +3,24 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_COOKIE, sessionIsValid } from "@/core/admin";
+import { ConflictError } from "@/core/errors";
 import { setOutcome } from "@/core/signups";
 import { setTaskClosed } from "@/core/tasks";
+
+/**
+ * Sends the Admin back to the Task they were looking at, carrying a problem
+ * to explain if there was one.
+ *
+ * Both actions below can lose a race with a Volunteer: the Admin has a Task
+ * page open, the Volunteer releases their Slot, and the Admin taps "Did not
+ * come". An uncaught ConflictError replaced the whole page with a generic
+ * error screen and no way back, which is the worst outcome available for
+ * something as ordinary as two people acting at once.
+ */
+function backToTask(taskId: string, problem?: ConflictError): never {
+  const query = problem ? `?problem=${encodeURIComponent(problem.reason)}` : "";
+  redirect(`/admin/tasks/${taskId}${query}`);
+}
 
 /**
  * Withdraws work that is no longer happening, or puts it back.
@@ -20,8 +36,13 @@ export async function setTaskClosedAction(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   const closed = String(formData.get("closed") ?? "") === "true";
 
-  await setTaskClosed(id, closed);
-  redirect(`/admin/tasks/${id}`);
+  try {
+    await setTaskClosed(id, closed);
+  } catch (error) {
+    if (error instanceof ConflictError) backToTask(id, error);
+    throw error;
+  }
+  backToTask(id);
 }
 
 /**
@@ -37,7 +58,12 @@ export async function setOutcomeAction(formData: FormData): Promise<void> {
   const outcome = String(formData.get("outcome") ?? "");
 
   if (outcome === "done" || outcome === "no_show") {
-    await setOutcome(signupId, outcome);
+    try {
+      await setOutcome(signupId, outcome);
+    } catch (error) {
+      if (error instanceof ConflictError) backToTask(taskId, error);
+      throw error;
+    }
   }
-  redirect(`/admin/tasks/${taskId}`);
+  backToTask(taskId);
 }

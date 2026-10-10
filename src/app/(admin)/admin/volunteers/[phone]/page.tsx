@@ -26,8 +26,9 @@ export default async function VolunteerRecord({
 }) {
   await requireAdminSession();
 
-  const { phone } = await params;
-  const e164 = decodeURIComponent(phone);
+  // Next has already percent-decoded the param. Decoding it again threw a
+  // URIError on a stray `%` and turned `%2520` into a space.
+  const { phone: e164 } = await params;
   const history = await volunteerHistory(e164);
   const timeZone = appTimeZone();
 
@@ -64,8 +65,15 @@ export default async function VolunteerRecord({
             <div>
               <div className="slot-head">
                 <h2>{entry.taskTitle}</h2>
-                <span className={entry.outcome === "done" ? "spots" : "spots covered"}>
-                  {OUTCOME_LABEL[entry.outcome] ?? entry.outcome}
+                {/* Work that has not happened yet is reported as such. The
+                    outcome defaults to "done", so this would otherwise read
+                    as attendance nobody has given yet. */}
+                <span
+                  className={entry.pending || entry.outcome === "done" ? "spots" : "spots covered"}
+                >
+                  {entry.pending
+                    ? "Not yet"
+                    : (OUTCOME_LABEL[entry.outcome] ?? entry.outcome)}
                 </span>
               </div>
               <p className="detail">

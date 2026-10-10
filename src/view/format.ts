@@ -28,11 +28,6 @@ export function formatShortDate(date: Date, locale: Locale, timeZone: string): s
   }).format(date);
 }
 
-/** A machine-readable value for <time datetime="..."> */
-export function isoDate(date: Date): string {
-  return date.toISOString();
-}
-
 /**
  * How long before a Task a Volunteer released their Slot, in words.
  *

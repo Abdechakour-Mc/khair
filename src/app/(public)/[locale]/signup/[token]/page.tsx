@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { mosqueIdentity } from "@/config/mosque";
 import { findSignupByCancelToken } from "@/core/signups";
-import { getTaskWithSlots } from "@/core/tasks";
+import { getTaskWithSlots, hasHappened } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
 import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
@@ -44,6 +44,7 @@ export default async function SignupConfirmation({
 
   const released = signup.cancelledAt !== null;
   const task = await getTaskWithSlots(signup.taskId);
+  const happened = task !== null && hasHappened(task);
   const timeZone = appTimeZone();
   const when = task?.startsAt
     ? `${formatDayHeading(task.startsAt, locale, timeZone)}, ${formatTime(task.startsAt, locale, timeZone)}`
@@ -82,15 +83,22 @@ export default async function SignupConfirmation({
             {mosque.name ? <p className="hint">{m.heldBy(mosque.name)}</p> : null}
           </div>
 
-          {/* A plain server action: no client JavaScript, so releasing a Slot
-              works on any phone that can submit a form. */}
-          <form action={releaseSignupAction} className="release-form">
-            <input type="hidden" name="token" value={signup.cancelToken} />
-            <input type="hidden" name="locale" value={locale} />
-            <button type="submit" className="action action-quiet">
-              {m.releaseSlot}
-            </button>
-          </form>
+          {happened ? (
+            // Not offered once the work has happened. Releasing a Slot is a
+            // statement about the future, and the core refuses it afterwards,
+            // so a button here would only ever produce an error.
+            <p className="hint">{m.releaseTooLate}</p>
+          ) : (
+            /* A plain server action: no client JavaScript, so releasing a Slot
+               works on any phone that can submit a form. */
+            <form action={releaseSignupAction} className="release-form">
+              <input type="hidden" name="token" value={signup.cancelToken} />
+              <input type="hidden" name="locale" value={locale} />
+              <button type="submit" className="action action-quiet">
+                {m.releaseSlot}
+              </button>
+            </form>
+          )}
         </>
       )}
 

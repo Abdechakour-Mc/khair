@@ -44,6 +44,7 @@ export type Messages = {
   confirmedUnknownBody: string;
 
   releaseSlot: string;
+  releaseTooLate: string;
   releasedTitle: string;
   releasedBody: string;
   heldBy: (organisation: string) => string;
@@ -96,6 +97,8 @@ const en: Messages = {
   heldBy: (organisation) =>
     `${organisation} holds your name and number for this task, and uses them for nothing else.`,
   releaseSlot: "Release my spot",
+  releaseTooLate:
+    "This task has already taken place, so the spot can no longer be released. If something went wrong, speak to whoever is on the desk.",
   releasedTitle: "Your spot is released",
   releasedBody:
     "You are no longer expected, and nobody is told why. Thank you for saying so in good time.",
@@ -116,6 +119,7 @@ const en: Messages = {
     task_closed: "This task has been called off.",
     task_passed: "This task's deadline has passed.",
     task_missing: "That task is no longer listed.",
+    task_happened: "That task has already taken place.",
     signup_missing: "That link does not match a signup.",
     signup_released: "That spot has already been released.",
     unknown: "Something went wrong. Please try again.",
@@ -165,6 +169,8 @@ const ar: Messages = {
   heldBy: (organisation) =>
     `${organisation} يحفظ اسمك ورقمك لهذا العمل فقط، ولا يستخدمهما لغير ذلك.`,
   releaseSlot: "التراجع عن مكاني",
+  releaseTooLate:
+    "انتهى هذا العمل بالفعل، فلم يعد بالإمكان التراجع عن المكان. إن كان هناك خطأ، تحدّث إلى المسؤول.",
   releasedTitle: "تم التراجع عن مكانك",
   releasedBody: "لم تعد متوقعًا، ولا يُخبر أحد بالسبب. شكرًا لإبلاغك في الوقت المناسب.",
 
@@ -184,6 +190,7 @@ const ar: Messages = {
     task_closed: "تم إلغاء هذا العمل.",
     task_passed: "انتهى موعد هذا العمل.",
     task_missing: "هذا العمل غير مدرج.",
+    task_happened: "انتهى هذا العمل بالفعل.",
     signup_missing: "هذا الرابط لا يطابق أي تسجيل.",
     signup_released: "تم التراجع عن هذا المكان بالفعل.",
     unknown: "حدث خطأ. حاول مرة أخرى.",
@@ -237,6 +244,8 @@ const fr: Messages = {
   heldBy: (organisation) =>
     `${organisation} conserve votre nom et votre numéro pour cette tâche uniquement.`,
   releaseSlot: "Libérer ma place",
+  releaseTooLate:
+    "Cette tâche a déjà eu lieu, la place ne peut donc plus être libérée. En cas de problème, parlez à la personne à l'accueil.",
   releasedTitle: "Votre place est libérée",
   releasedBody:
     "Vous n'êtes plus attendu, et personne n'en connaît la raison. Merci de l'avoir dit à temps.",
@@ -257,6 +266,7 @@ const fr: Messages = {
     task_closed: "Cette tâche a été annulée.",
     task_passed: "L'échéance de cette tâche est passée.",
     task_missing: "Cette tâche n'est plus affichée.",
+    task_happened: "Cette tâche a déjà eu lieu.",
     signup_missing: "Ce lien ne correspond à aucune inscription.",
     signup_released: "Cette place a déjà été libérée.",
     unknown: "Une erreur est survenue. Veuillez réessayer.",

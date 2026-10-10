@@ -1,5 +1,6 @@
 import { db, inTransaction } from "./db";
 import { ConflictError, ValidationError, type ValidationCode } from "./errors";
+import { isUuid } from "./ids";
 
 export type Task = {
   id: string;
@@ -14,6 +15,25 @@ export type Task = {
   closed: boolean;
   createdAt: Date;
 };
+
+/**
+ * When a Task is done with: its start if it has one, otherwise its Deadline.
+ *
+ * A flexible Task has no start, so the Deadline is the only moment it can be
+ * measured against. Both the Admin's page and the confirmation page need the
+ * same answer, and the release refusal in `releaseSignup` is the same rule
+ * expressed in SQL.
+ */
+export function happensAt(task: Pick<Task, "startsAt" | "dueBy">): Date {
+  return task.startsAt ?? task.dueBy;
+}
+
+export function hasHappened(
+  task: Pick<Task, "startsAt" | "dueBy">,
+  now: Date = new Date(),
+): boolean {
+  return happensAt(task).getTime() <= now.getTime();
+}
 
 /** A Task as the public list needs it: with its Slot arithmetic resolved. */
 export type OpenTask = Task & {
@@ -159,7 +179,7 @@ export async function listOpenTasks(now: Date = new Date()): Promise<OpenTask[]>
  * than pretending it never existed.
  */
 export async function getTaskWithSlots(id: string): Promise<OpenTask | null> {
-  if (!/^[0-9a-f-]{36}$/i.test(id ?? "")) return null;
+  if (!isUuid(id)) return null;
 
   const { rows } = await db().query<TaskRow & { slots_taken: string }>(
     `select t.*, coalesce(live.taken, 0) as slots_taken
@@ -232,6 +252,11 @@ export async function listTasksForAdmin(now: Date = new Date()): Promise<OpenTas
  * cut below the number of people already holding a Slot.
  */
 export async function editTask(id: string, input: PublishTaskInput): Promise<Task> {
+  // Guarded before the fields are read, like every other mutator. A stale or
+  // tampered hidden id used to reach Postgres and come back as "Something
+  // went wrong" with a logged stack trace, rather than the accurate answer.
+  if (!isUuid(id)) throw new ConflictError("task_missing", "That task is no longer listed.");
+
   const title = (input.title ?? "").trim();
   if (!title) throw new ValidationError("title", "title_required", "Give the task a title.");
 
@@ -303,7 +328,7 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
  * sends by hand, using the tappable numbers on the Task's Admin page.
  */
 export async function setTaskClosed(id: string, closed: boolean): Promise<Task> {
-  if (!/^[0-9a-f-]{36}$/i.test(id ?? "")) {
+  if (!isUuid(id)) {
     throw new ConflictError("task_missing", "That task is no longer listed.");
   }
 

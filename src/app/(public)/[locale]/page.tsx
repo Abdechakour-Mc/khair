@@ -3,7 +3,7 @@ import { listOpenTasks, type OpenTask } from "@/core/tasks";
 import { appTimeZone, isLocale, type Locale } from "@/i18n/config";
 import { messages, type Messages } from "@/i18n/messages";
 import { groupIntoAgenda } from "@/view/agenda";
-import { formatDayHeading, formatShortDate, formatTime, isoDate } from "@/view/format";
+import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 
 // The list depends on the current moment, so it is never cached.
 export const dynamic = "force-dynamic";
@@ -37,7 +37,10 @@ export default async function PublicTaskList({
           <section key={group.key}>
             <h2 className="day-heading">
               {group.kind === "day" ? (
-                <time dateTime={isoDate(group.date)}>
+                // The group's own key: the calendar day in the mosque's
+                // timezone, which is the day the heading beside it reads. The
+                // UTC instant named a different day for an evening Task.
+                <time dateTime={group.key}>
                   {formatDayHeading(group.date, locale, timeZone)}
                 </time>
               ) : (

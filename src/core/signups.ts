@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { PoolClient } from "pg";
 import { db, inTransaction } from "./db";
 import { ConflictError, ValidationError } from "./errors";
+import { isUuid } from "./ids";
 import { normalizePhone } from "./phone";
 
 export type Signup = {
@@ -109,7 +110,7 @@ export async function claimSlot(input: ClaimSlotInput): Promise<Signup> {
 type LockedTask = { id: string; slots_needed: number };
 
 async function lockTaskForClaim(client: PoolClient, taskId: string): Promise<LockedTask> {
-  if (!/^[0-9a-f-]{36}$/i.test(taskId ?? "")) {
+  if (!isUuid(taskId)) {
     throw new ConflictError("task_missing", "That task is no longer listed.");
   }
 
@@ -144,13 +145,25 @@ export async function findSignupByCancelToken(token: string): Promise<Signup | n
  * reported as success, because the person holding the token is its owner and
  * a double tap should not look like a failure. An unknown token is refused
  * with the same reason whether or not it ever existed.
+ *
+ * Refused once the work has happened. Releasing a Slot is a statement about
+ * the future, and after the fact it would erase the Admin's record instead:
+ * the Task happens, the Volunteer does not come, the Admin marks `no_show`,
+ * and the Volunteer opens their saved link. `outcome` would become
+ * `cancelled`, `setOutcome` would then refuse to touch it, and the Admin
+ * could never restore what they recorded. That contradicts the rule that the
+ * Admin's record is always correctable.
  */
-export async function releaseSignup(token: string): Promise<Signup> {
+export async function releaseSignup(token: string, now: Date = new Date()): Promise<Signup> {
   if (!token) throw new ConflictError("signup_missing", "That link does not match a signup.");
 
   return inTransaction(async (client) => {
-    const { rows } = await client.query<SignupRow>(
-      "select * from signups where cancel_token = $1 for update",
+    const { rows } = await client.query<SignupRow & { happens_at: Date }>(
+      `select s.*, coalesce(t.starts_at, t.due_by) as happens_at
+         from signups s
+         join tasks t on t.id = s.task_id
+        where s.cancel_token = $1
+          for update of s`,
       [token],
     );
 
@@ -158,7 +171,13 @@ export async function releaseSignup(token: string): Promise<Signup> {
     if (!existing) {
       throw new ConflictError("signup_missing", "That link does not match a signup.");
     }
+    // Checked before the timing, so somebody who released in good time and
+    // taps their saved link again next week still sees a success.
     if (existing.cancelled_at !== null) return toSignup(existing);
+
+    if (existing.happens_at.getTime() <= now.getTime()) {
+      throw new ConflictError("task_happened", "That task has already taken place.");
+    }
 
     const { rows: updated } = await client.query<SignupRow>(
       `update signups
@@ -179,7 +198,7 @@ export async function releaseSignup(token: string): Promise<Signup> {
  * order they were made, then anyone who released their Slot.
  */
 export async function listSignupsForTask(taskId: string): Promise<Signup[]> {
-  if (!/^[0-9a-f-]{36}$/i.test(taskId ?? "")) return [];
+  if (!isUuid(taskId)) return [];
 
   const { rows } = await db().query<SignupRow>(
     `select * from signups
@@ -208,7 +227,7 @@ export async function setOutcome(signupId: string, outcome: AdminOutcome): Promi
       "Only the volunteer can mark a signup cancelled, by releasing their own slot.",
     );
   }
-  if (!/^[0-9a-f-]{36}$/i.test(signupId ?? "")) {
+  if (!isUuid(signupId)) {
     throw new ConflictError("signup_missing", "That signup no longer exists.");
   }
 
@@ -242,6 +261,15 @@ export type VolunteerHistoryEntry = {
   taskDueBy: Date;
   outcome: Signup["outcome"];
   cancelledAt: Date | null;
+  /**
+   * The work has not happened yet, so there is nothing to report about it.
+   *
+   * `outcome` defaults to `done`, which means a Signup for next Friday would
+   * otherwise sit at the top of somebody's record as attendance they have not
+   * given yet, and the Admin would read a positive record for work nobody has
+   * done. A released Slot is settled whenever it was released.
+   */
+  pending: boolean;
 };
 
 /**
@@ -253,6 +281,7 @@ export type VolunteerHistoryEntry = {
 export async function volunteerHistory(
   phone: string,
   limit = 25,
+  now: Date = new Date(),
 ): Promise<VolunteerHistoryEntry[]> {
   if (!phone) return [];
 
@@ -278,5 +307,6 @@ export async function volunteerHistory(
     taskDueBy: row.due_by,
     outcome: row.outcome,
     cancelledAt: row.cancelled_at,
+    pending: row.cancelled_at === null && row.due_by.getTime() > now.getTime(),
   }));
 }

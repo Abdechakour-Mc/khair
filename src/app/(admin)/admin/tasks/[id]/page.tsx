@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { listSignupsForTask } from "@/core/signups";
-import { getTaskWithSlots } from "@/core/tasks";
+import { getTaskWithSlots, happensAt, hasHappened } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { describeLeadTime, formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { requireAdminSession } from "../../session";
@@ -9,10 +9,27 @@ import { setOutcomeAction, setTaskClosedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminTaskDetail({ params }: { params: Promise<{ id: string }> }) {
+/**
+ * What to say when the Admin loses a race with a Volunteer. Admin view only,
+ * so English only, like the rest of these pages.
+ */
+const PROBLEM_LABEL: Record<string, string> = {
+  signup_released: "That volunteer released their spot just now, so there is nothing to record against it.",
+  signup_missing: "That signup is no longer there. It may have been removed while this page was open.",
+  task_missing: "That task is no longer there.",
+};
+
+export default async function AdminTaskDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ problem?: string }>;
+}) {
   await requireAdminSession();
 
   const { id } = await params;
+  const { problem } = await searchParams;
   const task = await getTaskWithSlots(id);
   if (!task) notFound();
 
@@ -23,8 +40,8 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
 
   // A flexible Task has no start, so a cancellation is measured against its
   // Deadline instead.
-  const reference = task.startsAt ?? task.dueBy;
-  const hasHappened = reference.getTime() <= Date.now();
+  const reference = happensAt(task);
+  const happened = hasHappened(task);
 
   return (
     <>
@@ -36,6 +53,12 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
         <h1>{task.title}</h1>
         {task.description ? <p>{task.description}</p> : null}
       </div>
+
+      {problem ? (
+        <div className="empty" role="status">
+          <p>{PROBLEM_LABEL[problem] ?? "That did not go through. Nothing was changed."}</p>
+        </div>
+      ) : null}
 
       <dl className="facts">
         <div>
@@ -127,7 +150,7 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
             {/* Everything counts as done already, so this only ever records an
                 exception, and it goes back with one more tap. Nothing here is
                 shown to the volunteer or added up into a score. */}
-            {hasHappened || task.closed ? (
+            {happened || task.closed ? (
               <form action={setOutcomeAction} className="outcome-form">
                 <input type="hidden" name="taskId" value={task.id} />
                 <input type="hidden" name="signupId" value={signup.id} />
