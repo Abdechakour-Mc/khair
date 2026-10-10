@@ -2,6 +2,7 @@ import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { volunteerHistory } from "@/core/signups";
 import { appTimeZone } from "@/i18n/config";
 import { describeLeadTime, formatShortDate } from "@/view/format";
+import { decodeParam } from "@/view/params";
 import { requireAdminSession } from "../../session";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +27,9 @@ export default async function VolunteerRecord({
 }) {
   await requireAdminSession();
 
-  // Next has already percent-decoded the param. Decoding it again threw a
-  // URIError on a stray `%` and turned `%2520` into a space.
-  const { phone: e164 } = await params;
+  const { phone } = await params;
+  // Decoded, but not trusted to be decodable: see decodeParam.
+  const e164 = decodeParam(phone);
   const history = await volunteerHistory(e164);
   const timeZone = appTimeZone();
 
@@ -84,6 +85,22 @@ export default async function VolunteerRecord({
           </article>
         ))
       )}
+
+      {/* The way to answer somebody who asks for their data to be deleted.
+          At the foot of the page rather than beside the record: it is the
+          rarest thing here and the only thing that cannot be undone. */}
+      <h2 className="day-heading">If they ask to be forgotten</h2>
+      <div className="empty">
+        <p>
+          You can delete this volunteer and everything above. It is complete and it cannot be
+          undone, so it asks you to type their number first.
+        </p>
+        <p className="backlink">
+          <a className="linkish linkish-destructive" href={`/admin/volunteers/${encodeURIComponent(e164)}/forget`}>
+            Forget this volunteer
+          </a>
+        </p>
+      </div>
     </>
   );
 }

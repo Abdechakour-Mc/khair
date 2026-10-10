@@ -70,10 +70,23 @@ are medium and below, which is why they are written down rather than rushed.
       `dateTime="2026-10-18T00:00:00.000Z"` inside a heading that reads
       "17 October". Emit the `YYYY-MM-DD` that `dayKey` already computed.
 
-- [x] **The volunteer page decodes its route param twice.** Next already
-      percent-decodes dynamic params, so `/admin/volunteers/%25` throws a
-      `URIError` and 500s for the signed-in Admin, while `%2520` silently
-      becomes a space. Use the param as given.
+- [x] **The volunteer page's route param is decoded unsafely.** `/admin/volunteers/%25`
+      throws a `URIError` and 500s for the signed-in Admin.
+
+      **This finding was half wrong, and the fix as written broke the page.**
+      It claimed Next already percent-decodes dynamic params and that the
+      decode should therefore be dropped. Checked against Next 16 in the
+      running app, it does not: `/admin/volunteers/%2B15142849137` arrives as
+      the literal `%2B15142849137`, and so does the same URL typed with a bare
+      `+`. Using the param as given showed `%2B15142849137` as the heading and
+      queried the history on a string no Volunteer has, so a real volunteer's
+      record read "No signups on record for this number".
+
+      The decode is necessary; what it must not do is assume the segment is
+      decodable. Both Admin volunteer pages now go through `decodeParam`,
+      which decodes and keeps the raw value if that throws. A segment that
+      cannot be decoded matches nothing, which is the right answer for a URL
+      nobody legitimately produced.
 
 ## Afterwards
 

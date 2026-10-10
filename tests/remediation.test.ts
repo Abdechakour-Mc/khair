@@ -10,6 +10,7 @@ import {
   volunteerHistory,
 } from "@/core/signups";
 import { editTask, getTaskWithSlots, publishTask, setTaskClosed } from "@/core/tasks";
+import { decodeParam } from "@/view/params";
 import { hoursFromNow, resetDb } from "./helpers/db";
 
 beforeEach(resetDb);
@@ -254,5 +255,25 @@ describe("a Volunteer's record", () => {
     const [entry] = await volunteerHistory("+15142849137");
     expect(entry?.outcome).toBe("cancelled");
     expect(entry?.pending).toBe(false);
+  });
+});
+
+/**
+ * Next hands a dynamic param over still percent-encoded, so the Admin's
+ * volunteer pages have to decode it; and a crafted segment is not always
+ * valid encoding, so the decode has to survive that rather than 500.
+ */
+describe("a phone number arriving in a URL", () => {
+  it("is decoded, so it matches the number that was stored", () => {
+    expect(decodeParam("%2B15142849137")).toBe("+15142849137");
+  });
+
+  it("survives a segment that is not valid encoding", () => {
+    expect(decodeParam("%")).toBe("%");
+    expect(decodeParam("%zz")).toBe("%zz");
+  });
+
+  it("leaves an already-plain segment alone", () => {
+    expect(decodeParam("+15142849137")).toBe("+15142849137");
   });
 });
