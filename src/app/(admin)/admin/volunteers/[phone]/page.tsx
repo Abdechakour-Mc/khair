@@ -1,11 +1,12 @@
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { volunteerHistory } from "@/core/signups";
-import { earlyAccessHours, isTrustedVolunteer } from "@/core/tasks";
+import { earlyAccessHours } from "@/core/tasks";
+import { volunteerStanding } from "@/core/volunteers";
 import { appTimeZone } from "@/i18n/config";
 import { describeLeadTime, formatShortDate } from "@/view/format";
 import { decodeParam } from "@/view/params";
 import { requireAdminSession } from "../../session";
-import { setVolunteerTrustedAction } from "./actions";
+import { setVolunteerPausedAction, setVolunteerTrustedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,9 @@ export default async function VolunteerRecord({
   // Decoded, but not trusted to be decodable: see decodeParam.
   const e164 = decodeParam(phone);
   const history = await volunteerHistory(e164);
-  const trusted = await isTrustedVolunteer(e164);
+  const standing = await volunteerStanding(e164);
+  const trusted = standing?.trusted === true;
+  const pausedAt = standing?.pausedAt ?? null;
   const timeZone = appTimeZone();
 
   return (
@@ -86,6 +89,30 @@ export default async function VolunteerRecord({
           <input type="hidden" name="trusted" value={trusted ? "false" : "true"} />
           <button type="submit" className="action action-quiet">
             {trusted ? "Remove the mark" : "Mark as trusted"}
+          </button>
+        </form>
+      </div>
+
+      {/* The ordinary tool for somebody who claims spots and does not come,
+          and deliberately the only one. Private, reversible, recorded, and
+          never a ban: the same person with a new number is a new volunteer,
+          so calling it enforcement would be a lie about what it can do. */}
+      <h2 className="day-heading">Asking them to pause</h2>
+      <div className="empty">
+        <p>
+          {pausedAt
+            ? `Paused since ${formatShortDate(pausedAt, "en", timeZone)}. They cannot claim new spots. Nothing told them so, and nothing public shows it.`
+            : "Not paused. Before you do this, consider a phone call: the record above may be all you needed, and a conversation is usually the better instrument."}
+        </p>
+        <p className="hint">
+          A pause stops new signups and nothing else. Spots they already hold stay theirs, and
+          they can still release one or say the work is done. Lift it whenever you like.
+        </p>
+        <form action={setVolunteerPausedAction}>
+          <input type="hidden" name="phone" value={e164} />
+          <input type="hidden" name="paused" value={pausedAt ? "false" : "true"} />
+          <button type="submit" className="action action-quiet">
+            {pausedAt ? "Lift the pause" : "Ask them to pause"}
           </button>
         </form>
       </div>

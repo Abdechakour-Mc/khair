@@ -1,0 +1,25 @@
+-- A Volunteer who repeatedly claims Slots and does not come can be quietly
+-- paused by the Admin, and quietly unpaused.
+--
+-- A timestamp rather than a boolean, so the Admin can see when they did it
+-- and explain the decision months later. Lifting sets it back to null:
+-- there is no "paused until", no expiry to schedule, and no permanent state
+-- to reach. A pause is always exactly as reversible as it was when it
+-- started.
+--
+-- Never applied by a counter or a threshold. Three no-shows do not pause
+-- anybody: the Admin reads the record and decides as a human, which is the
+-- same reason Khair has no score.
+--
+-- Not a ban, and the word does not appear in this schema or in the UI.
+-- Identity here rests on an unverified phone number, so the same person with
+-- a new number is a new Volunteer. This is a request, and describing it as
+-- enforcement would be a lie about what it can do.
+--
+-- A pause stops new claims and nothing else. Signups the Volunteer already
+-- holds stay exactly as they are - cancelling on somebody's behalf would be
+-- the mosque deciding they are not coming, which is not the mosque's to
+-- decide - and they keep being able to release a Slot and to say work is
+-- done, because a paused person must never be trapped in a commitment.
+
+alter table volunteers add column paused_at timestamptz;

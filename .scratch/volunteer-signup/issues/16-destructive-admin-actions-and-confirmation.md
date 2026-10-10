@@ -12,7 +12,7 @@ Admin needs to be able to say yes.
 **Blocked by:** None (can start immediately). Worth doing before 09 and 10,
 which add the synthetic data this ticket needs to be able to clear.
 
-**Status:** done, except the two moderation boxes that ticket 10 carries
+**Status:** done
 
 ## The confirmation rule
 
@@ -92,15 +92,15 @@ Ticket 10's reversible private pause is therefore the primary and probably only
 tool needed. A permanent rung may exist at the top of the ladder, but it stays
 private, stays recorded, and stays liftable by the Admin.
 
-- [ ] Moderation is graduated: the pause from ticket 10 is the ordinary tool,
+- [x] Moderation is graduated: the pause from ticket 10 is the ordinary tool,
       and anything heavier is an explicit further step — carried by ticket 10
-- [ ] Every moderation action is reversible by the Admin — carried by ticket 10
-- [ ] Nothing about a restriction is ever shown publicly, and no page reveals
+- [x] Every moderation action is reversible by the Admin — carried by ticket 10
+- [x] Nothing about a restriction is ever shown publicly, and no page reveals
       that restriction exists — carried by ticket 10
 - [x] Each moderation action is recorded with what changed and when, so it can
       be explained later — the `admin_actions` table is here, ticket 10 writes
       its pause and lift into it
-- [ ] Because identity rests on an unverified phone number, any block is a
+- [x] Because identity rests on an unverified phone number, any block is a
       request and not an enforcement: the same person with a new number is a new
       Volunteer. Never describe it in the code or the UI as if it were airtight.
       — carried by ticket 10

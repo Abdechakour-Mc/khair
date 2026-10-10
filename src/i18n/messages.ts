@@ -147,6 +147,8 @@ const en: Messages = {
     task_missing: "That task is no longer listed.",
     task_happened: "That task has already taken place.",
     task_not_started: "That task has not started yet.",
+    volunteer_paused:
+      "This signup could not be added. Please speak to whoever is on the desk.",
     signup_missing: "That link does not match a signup.",
     signup_released: "That spot has already been released.",
     confirmation_mismatch: "That does not match what was asked for.",
@@ -234,6 +236,7 @@ const ar: Messages = {
     task_missing: "هذا العمل غير مدرج.",
     task_happened: "انتهى هذا العمل بالفعل.",
     task_not_started: "لم يبدأ هذا العمل بعد.",
+    volunteer_paused: "لم تُضَف هذه المشاركة. تحدّث إلى المسؤول في المسجد.",
     signup_missing: "هذا الرابط لا يطابق أي تسجيل.",
     signup_released: "تم التراجع عن هذا المكان بالفعل.",
     confirmation_mismatch: "لا يطابق المطلوب.",
@@ -327,6 +330,8 @@ const fr: Messages = {
     task_missing: "Cette tâche n'est plus affichée.",
     task_happened: "Cette tâche a déjà eu lieu.",
     task_not_started: "Cette tâche n'a pas encore commencé.",
+    volunteer_paused:
+      "Cette inscription n'a pas pu être ajoutée. Adressez-vous à la personne à l'accueil.",
     signup_missing: "Ce lien ne correspond à aucune inscription.",
     signup_released: "Cette place a déjà été libérée.",
     confirmation_mismatch: "Cela ne correspond pas à ce qui est demandé.",

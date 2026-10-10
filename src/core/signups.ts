@@ -145,16 +145,26 @@ async function lockTaskForClaim(
     throw new ConflictError("task_passed", "This task's deadline has passed.");
   }
 
+  const { rows: standing } = await client.query<{ trusted: boolean; paused_at: Date | null }>(
+    "select trusted, paused_at from volunteers where phone = $1",
+    [phone],
+  );
+
+  // A paused Volunteer cannot take on new work. Refused before the Slot
+  // arithmetic, so a pause never consumes a Slot, and said in a sentence
+  // that points at a person rather than at a mechanism: nothing on any page
+  // reveals that pausing exists, and this is seen only by the one person who
+  // just typed their own number into their own phone.
+  if (standing[0]?.paused_at != null) {
+    throw new ConflictError("volunteer_paused", "This signup could not be added.");
+  }
+
   // Early access is checked against the number being claimed with, not
   // against a cookie, so the gate is at least as good as the identity it
   // rests on. The refusal is word for word the one for a Task that does not
   // exist: saying "this is reserved for trusted volunteers" would announce
   // the window to the person it is being kept from.
-  const { rows: trust } = await client.query<{ trusted: boolean }>(
-    "select trusted from volunteers where phone = $1",
-    [phone],
-  );
-  const viewer = { trusted: trust[0]?.trusted === true };
+  const viewer = { trusted: standing[0]?.trusted === true };
   if (withheldFrom({ important: task.important, createdAt: task.created_at }, viewer)) {
     throw new ConflictError("task_missing", "That task is no longer listed.");
   }

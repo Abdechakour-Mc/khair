@@ -565,33 +565,6 @@ export function withheldFrom(
   return now.getTime() < opensAt;
 }
 
-/**
- * Whether the Admin has marked this number as one they rely on.
- *
- * Visible to the Admin alone: it appears on no public page, is never shown to
- * the Volunteer, and is never aggregated into a score or a rank, for the same
- * reason there is no leaderboard.
- */
-export async function isTrustedVolunteer(phone: string): Promise<boolean> {
-  if (!phone) return false;
-  const { rows } = await db().query<{ trusted: boolean }>(
-    "select trusted from volunteers where phone = $1",
-    [phone],
-  );
-  return rows[0]?.trusted === true;
-}
-
-/** The Admin marks somebody as relied upon, or takes that back. */
-export async function setVolunteerTrusted(phone: string, trusted: boolean): Promise<boolean> {
-  const { rows } = await db().query<{ trusted: boolean }>(
-    "update volunteers set trusted = $2 where phone = $1 returning trusted",
-    [phone, trusted],
-  );
-  const row = rows[0];
-  if (!row) {
-    // Trust is about somebody who has actually turned up, so there is nobody
-    // to mark until they have signed up at least once.
-    throw new ConflictError("signup_missing", "Nobody has signed up with that number.");
-  }
-  return row.trusted;
-}
+/* Trust itself lives in `volunteers.ts`, with the pause: both are things the
+   Admin records about a person. What stays here is the rule about which
+   Tasks are withheld, which is a question about a Task. */

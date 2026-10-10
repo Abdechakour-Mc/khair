@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { readRememberedVolunteer, VOLUNTEER_COOKIE } from "@/core/remembered";
-import { isTrustedVolunteer, type Viewer } from "@/core/tasks";
+import type { Viewer } from "@/core/tasks";
+import { isTrustedVolunteer } from "@/core/volunteers";
 
 /**
  * What the public pages know about whoever is reading them, which is only

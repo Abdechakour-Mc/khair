@@ -5,12 +5,11 @@ import {
   earlyAccessHours,
   editTask,
   getTaskWithSlots,
-  isTrustedVolunteer,
   listOpenTasks,
   publishTask,
-  setVolunteerTrusted,
   withheldFrom,
 } from "@/core/tasks";
+import { isTrustedVolunteer, setVolunteerTrusted } from "@/core/volunteers";
 import { hoursFromNow, resetDb } from "./helpers/db";
 import { openTask } from "./helpers/task";
 
