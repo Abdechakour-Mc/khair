@@ -243,3 +243,36 @@ describe("what the Volunteer gives us", () => {
     expect(signup.volunteerPhone).toBe("+14382017744");
   });
 });
+
+describe("what the Admin sees on a Task", () => {
+  it("lists live claims first, then anyone who released a Slot", async () => {
+    const { listSignupsForTask, releaseSignup } = await import("@/core/signups");
+    const task = await openTask(3);
+
+    const first = await claimSlot({ taskId: task.id, name: "Yusuf", phone: "5142849137" });
+    await claimSlot({ taskId: task.id, name: "Khadija", phone: "4382017744" });
+    await releaseSignup(first.cancelToken);
+
+    const listed = await listSignupsForTask(task.id);
+    expect(listed.map((s) => s.nameSnapshot)).toEqual(["Khadija", "Yusuf"]);
+    expect(listed[0]?.cancelledAt).toBeNull();
+    expect(listed[1]?.cancelledAt).toBeInstanceOf(Date);
+  });
+
+  it("shows the name typed on the day, not the Volunteer's newest name", async () => {
+    const { listSignupsForTask } = await import("@/core/signups");
+    const first = await openTask(1);
+    const second = await publishTask({ title: "Shoe rack repair", dueBy: hoursFromNow(120) });
+
+    await claimSlot({ taskId: first.id, name: "Yusuf", phone: "5142849137" });
+    await claimSlot({ taskId: second.id, name: "Yusuf Benali", phone: "5142849137" });
+
+    expect((await listSignupsForTask(first.id))[0]?.nameSnapshot).toBe("Yusuf");
+    expect((await listSignupsForTask(second.id))[0]?.nameSnapshot).toBe("Yusuf Benali");
+  });
+
+  it("returns nothing for a Task that does not exist, without hitting the database", async () => {
+    const { listSignupsForTask } = await import("@/core/signups");
+    expect(await listSignupsForTask("not-an-id")).toEqual([]);
+  });
+});

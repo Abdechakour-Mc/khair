@@ -173,3 +173,19 @@ export async function releaseSignup(token: string): Promise<Signup> {
     return toSignup(row);
   });
 }
+
+/**
+ * Every Signup on a Task, for the Admin's eyes only. Live claims first in the
+ * order they were made, then anyone who released their Slot.
+ */
+export async function listSignupsForTask(taskId: string): Promise<Signup[]> {
+  if (!/^[0-9a-f-]{36}$/i.test(taskId ?? "")) return [];
+
+  const { rows } = await db().query<SignupRow>(
+    `select * from signups
+      where task_id = $1
+      order by (cancelled_at is not null), created_at`,
+    [taskId],
+  );
+  return rows.map(toSignup);
+}

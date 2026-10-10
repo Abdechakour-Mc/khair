@@ -52,7 +52,9 @@ export default async function AdminTaskList() {
           <article className="slot" key={task.id}>
             <div>
               <div className="slot-head">
-                <h2>{task.title}</h2>
+                <h2>
+                  <a href={`/admin/tasks/${task.id}`}>{task.title}</a>
+                </h2>
                 <span className={task.isFull ? "spots covered" : "spots"}>
                   {task.slotsTaken} of {task.slotsNeeded}
                 </span>
@@ -78,7 +80,9 @@ export default async function AdminTaskList() {
             <article className="slot" key={task.id}>
               <div>
                 <div className="slot-head">
-                  <h2>{task.title}</h2>
+                  <h2>
+                  <a href={`/admin/tasks/${task.id}`}>{task.title}</a>
+                </h2>
                   <span className="spots covered">
                     {task.slotsTaken} of {task.slotsNeeded}
                   </span>
