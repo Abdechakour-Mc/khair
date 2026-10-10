@@ -18,6 +18,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Machine endpoints have no language either.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   const firstSegment = pathname.split("/")[1];
 
   if (isLocale(firstSegment)) {

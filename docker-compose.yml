@@ -37,6 +37,7 @@ services:
       # Days are grouped in the mosque's own timezone, not the server's.
       APP_TIMEZONE: America/Toronto
       RETENTION_MONTHS: "6"
+      CRON_SECRET: local-development-only
       # One deployment, one mosque. See .env.example for why this is config
       # rather than a database entity.
       MOSQUE_NAME: Al-Madinah Center
