@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { ValidationError } from "./errors";
+import { ValidationError, type ValidationCode } from "./errors";
 
 export type Task = {
   id: string;
@@ -58,30 +58,39 @@ function toTask(row: TaskRow): Task {
   };
 }
 
-function requireValidDate(value: unknown, field: string, label: string): Date {
+function requireValidDate(
+  value: unknown,
+  field: string,
+  code: ValidationCode,
+  label: string,
+): Date {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
-    throw new ValidationError(field, `${label} is required.`);
+    throw new ValidationError(field, code, `${label} is required.`);
   }
   return value;
 }
 
 export async function publishTask(input: PublishTaskInput): Promise<Task> {
   const title = (input.title ?? "").trim();
-  if (!title) throw new ValidationError("title", "Give the task a title.");
+  if (!title) throw new ValidationError("title", "title_required", "Give the task a title.");
 
-  const dueBy = requireValidDate(input.dueBy, "dueBy", "A deadline");
+  const dueBy = requireValidDate(input.dueBy, "dueBy", "deadline_required", "A deadline");
 
   let startsAt: Date | null = null;
   if (input.startsAt !== undefined && input.startsAt !== null) {
-    startsAt = requireValidDate(input.startsAt, "startsAt", "The start time");
+    startsAt = requireValidDate(input.startsAt, "startsAt", "start_invalid", "The start time");
     if (startsAt.getTime() > dueBy.getTime()) {
-      throw new ValidationError("startsAt", "The start time is after the deadline.");
+      throw new ValidationError(
+        "startsAt",
+        "start_after_deadline",
+        "The start time is after the deadline.",
+      );
     }
   }
 
   const slotsNeeded = input.slotsNeeded ?? 1;
   if (!Number.isInteger(slotsNeeded) || slotsNeeded < 1) {
-    throw new ValidationError("slotsNeeded", "At least one helper is needed.");
+    throw new ValidationError("slotsNeeded", "slots_too_few", "At least one helper is needed.");
   }
 
   const { rows } = await db().query<TaskRow>(
@@ -142,4 +151,40 @@ export async function listOpenTasks(now: Date = new Date()): Promise<OpenTask[]>
       isFlexible: task.startsAt === null,
     };
   });
+}
+
+/**
+ * One Task with its Slot arithmetic, regardless of whether it is still open.
+ * The detail page needs this so it can explain a closed or passed Task rather
+ * than pretending it never existed.
+ */
+export async function getTaskWithSlots(id: string): Promise<OpenTask | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id ?? "")) return null;
+
+  const { rows } = await db().query<TaskRow & { slots_taken: string }>(
+    `select t.*, coalesce(live.taken, 0) as slots_taken
+       from tasks t
+       left join (
+         select task_id, count(*) as taken
+           from signups
+          where cancelled_at is null
+          group by task_id
+       ) live on live.task_id = t.id
+      where t.id = $1`,
+    [id],
+  );
+
+  const row = rows[0];
+  if (!row) return null;
+
+  const task = toTask(row);
+  const slotsTaken = Number(row.slots_taken);
+  const slotsRemaining = Math.max(0, task.slotsNeeded - slotsTaken);
+  return {
+    ...task,
+    slotsTaken,
+    slotsRemaining,
+    isFull: slotsRemaining === 0,
+    isFlexible: task.startsAt === null,
+  };
 }

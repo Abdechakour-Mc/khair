@@ -84,12 +84,17 @@ function Slot({
         </p>
         {task.description ? <p className="note">{task.description}</p> : null}
       </div>
-      {/* Claiming a Slot arrives in ticket 02. Until then the control is
-          present and visibly inert rather than absent, so the layout is the
-          one that ships. */}
-      <span className="action" aria-disabled="true">
-        {task.isFull ? m.fullyCovered : m.signUp}
-      </span>
+      {task.isFull ? (
+        // Still listed, so the page does not look broken and the community
+        // can see the work is covered. Just nothing left to claim.
+        <span className="action" aria-disabled="true">
+          {m.fullyCovered}
+        </span>
+      ) : (
+        <a className="action" href={`/${locale}/task/${task.id}`}>
+          {m.signUp}
+        </a>
+      )}
     </article>
   );
 }
