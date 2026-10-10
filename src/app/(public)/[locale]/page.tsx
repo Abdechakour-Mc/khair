@@ -32,6 +32,12 @@ export default async function PublicTaskList({
         <p>{m.pageIntro}</p>
       </div>
 
+      {/* For somebody who closed the tab. Quiet, because it is the exception
+          and not the task. */}
+      <p className="backlink">
+        <a href={`/${locale}/find`}>{m.findLink}</a>
+      </p>
+
       {groups.length === 0 ? (
         <div className="empty">
           <h2>{m.emptyTitle}</h2>

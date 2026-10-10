@@ -48,6 +48,17 @@ export type Messages = {
   confirmedTitle: string;
   confirmedFor: (title: string) => string;
   confirmedKeepLink: string;
+  codeLabel: string;
+  codeKeep: string;
+  findTitle: string;
+  findIntro: string;
+  findCodeLabel: string;
+  findCodeHint: string;
+  findPhoneHint: string;
+  findSubmit: string;
+  findSearching: string;
+  findNothing: string;
+  findLink: string;
   confirmedUnknownTitle: string;
   confirmedUnknownBody: string;
 
@@ -110,6 +121,19 @@ const en: Messages = {
   confirmedFor: (title) => `You signed up for ${title}.`,
   confirmedKeepLink:
     "Save this page. It is how you release your spot if your plans change, and it works without signing in.",
+  codeLabel: "Your code",
+  codeKeep:
+    "If you lose this page, write this down. You can come back with the code and your phone number.",
+  findTitle: "Find your signup",
+  findIntro: "Enter the code you were given and the number you signed up with.",
+  findCodeLabel: "Your code",
+  findCodeHint: "Six digits, from the page you saw when you signed up.",
+  findPhoneHint: "The same number you used to sign up.",
+  findSubmit: "Find my signup",
+  findSearching: "Looking",
+  findNothing:
+    "That code and number do not match a signup. Check both, or ask whoever is on the desk.",
+  findLink: "Already signed up? Find it again",
   confirmedUnknownTitle: "This link does not match a signup",
   confirmedUnknownBody:
     "It may already have been used. The current list is on the front page.",
@@ -202,6 +226,17 @@ const ar: Messages = {
   confirmedFor: (title) => `سجّلت في: ${title}.`,
   confirmedKeepLink:
     "احفظ هذه الصفحة. منها تتراجع عن مكانك إن تغيّرت خططك، وتعمل بدون تسجيل دخول.",
+  codeLabel: "رمزك",
+  codeKeep: "إن فقدت هذه الصفحة فاكتب الرمز. يمكنك العودة بالرمز ورقم هاتفك.",
+  findTitle: "ابحث عن تسجيلك",
+  findIntro: "أدخل الرمز الذي حصلت عليه والرقم الذي سجّلت به.",
+  findCodeLabel: "الرمز",
+  findCodeHint: "ستة أرقام، من الصفحة التي ظهرت لك عند التسجيل.",
+  findPhoneHint: "نفس الرقم الذي سجّلت به.",
+  findSubmit: "ابحث عن تسجيلي",
+  findSearching: "جارٍ البحث",
+  findNothing: "الرمز والرقم لا يطابقان أي تسجيل. تحقّق منهما أو اسأل المسؤول.",
+  findLink: "سجّلت من قبل؟ ابحث عن تسجيلك",
   confirmedUnknownTitle: "هذا الرابط لا يطابق أي تسجيل",
   confirmedUnknownBody: "قد يكون استُخدم من قبل. القائمة الحالية في الصفحة الرئيسية.",
 
@@ -293,6 +328,19 @@ const fr: Messages = {
   confirmedFor: (title) => `Vous vous êtes inscrit à : ${title}.`,
   confirmedKeepLink:
     "Gardez cette page. C'est ainsi que vous libérez votre place si vos plans changent, sans aucune connexion.",
+  codeLabel: "Votre code",
+  codeKeep:
+    "Si vous perdez cette page, notez ce code. Vous pourrez revenir avec le code et votre numéro.",
+  findTitle: "Retrouvez votre inscription",
+  findIntro: "Entrez le code reçu et le numéro utilisé pour vous inscrire.",
+  findCodeLabel: "Votre code",
+  findCodeHint: "Six chiffres, affichés sur la page de confirmation.",
+  findPhoneHint: "Le même numéro que lors de votre inscription.",
+  findSubmit: "Retrouver mon inscription",
+  findSearching: "Recherche",
+  findNothing:
+    "Ce code et ce numéro ne correspondent à aucune inscription. Vérifiez les deux, ou adressez-vous à l'accueil.",
+  findLink: "Déjà inscrit ? Retrouvez votre inscription",
   confirmedUnknownTitle: "Ce lien ne correspond à aucune inscription",
   confirmedUnknownBody:
     "Il a peut-être déjà été utilisé. La liste actuelle est sur la page d'accueil.",

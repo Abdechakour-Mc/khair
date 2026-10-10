@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 import type { PoolClient } from "pg";
 import { db, inTransaction } from "./db";
 import { ConflictError, ValidationError } from "./errors";
@@ -12,6 +12,14 @@ export type Signup = {
   volunteerPhone: string;
   nameSnapshot: string;
   cancelToken: string;
+  /**
+   * Six digits the Volunteer can write down or read out, which reach this
+   * Signup only when given with the phone number that claimed it.
+   *
+   * A lookup key and not a secret: the secret is the phone number, which they
+   * have already typed once. Null only on rows written before this existed.
+   */
+  findCode: string | null;
   outcome: "done" | "cancelled" | "no_show";
   cancelledAt: Date | null;
   /**
@@ -37,6 +45,7 @@ type SignupRow = {
   volunteer_phone: string;
   name_snapshot: string;
   cancel_token: string;
+  find_code: string | null;
   outcome: Signup["outcome"];
   cancelled_at: Date | null;
   volunteer_done_at: Date | null;
@@ -50,6 +59,7 @@ function toSignup(row: SignupRow): Signup {
     volunteerPhone: row.volunteer_phone,
     nameSnapshot: row.name_snapshot,
     cancelToken: row.cancel_token,
+    findCode: row.find_code,
     outcome: row.outcome,
     cancelledAt: row.cancelled_at,
     volunteerDoneAt: row.volunteer_done_at,
@@ -60,6 +70,34 @@ function toSignup(row: SignupRow): Signup {
 /** 32 bytes of url-safe randomness. Guessing one is not a realistic attack. */
 function newCancelToken(): string {
   return randomBytes(24).toString("base64url");
+}
+
+/**
+ * Six digits, drawn evenly so no code is likelier than another.
+ *
+ * Digits and not letters, which settles the "avoid characters misread by
+ * hand" requirement by construction: there is no O to confuse with 0 and no
+ * I to confuse with 1, and a congregant can read six digits down the phone
+ * without spelling anything.
+ *
+ * Six is enough because the code is not the secret. On its own it would be a
+ * million values against a few hundred live Signups, which is guessable; with
+ * the phone number required alongside it, it is a lookup key.
+ */
+export function newFindCode(): string {
+  // randomInt is unbiased, unlike a modulo of random bytes.
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
+}
+
+/** "482 173" - two groups, so it can be read aloud and written down. */
+export function formatFindCode(code: string): string {
+  return /^[0-9]{6}$/.test(code) ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
+}
+
+/** Whatever they typed, with the spaces and dashes they added taken out. */
+function normalizeFindCode(given: string): string | null {
+  const digits = (given ?? "").replace(/[^0-9]/g, "");
+  return /^[0-9]{6}$/.test(digits) ? digits : null;
 }
 
 const UNIQUE_VIOLATION = "23505";
@@ -99,21 +137,36 @@ export async function claimSlot(input: ClaimSlotInput): Promise<Signup> {
       [phone, name],
     );
 
-    try {
-      const { rows } = await client.query<SignupRow>(
-        `insert into signups (task_id, volunteer_phone, name_snapshot, cancel_token)
-         values ($1, $2, $3, $4)
-         returning *`,
-        [task.id, phone, name, newCancelToken()],
-      );
-      const row = rows[0];
-      if (!row) throw new Error("claimSlot inserted no row");
-      return toSignup(row);
-    } catch (error) {
-      if ((error as { code?: string }).code === UNIQUE_VIOLATION) {
+    // The code only has to be unique among live Signups, so a collision is
+    // both unlikely and cheap to retry. Each attempt is its own savepoint:
+    // without one, a unique violation would poison the whole transaction and
+    // the retry would fail on a different error.
+    for (let attempt = 0; ; attempt += 1) {
+      await client.query("savepoint claim_attempt");
+      try {
+        const { rows } = await client.query<SignupRow>(
+          `insert into signups (task_id, volunteer_phone, name_snapshot, cancel_token, find_code)
+           values ($1, $2, $3, $4, $5)
+           returning *`,
+          [task.id, phone, name, newCancelToken(), newFindCode()],
+        );
+        const row = rows[0];
+        if (!row) throw new Error("claimSlot inserted no row");
+        await client.query("release savepoint claim_attempt");
+        return toSignup(row);
+      } catch (error) {
+        await client.query("rollback to savepoint claim_attempt");
+
+        if ((error as { code?: string }).code !== UNIQUE_VIOLATION) throw error;
+
+        // Two unique indexes can raise this: one live Signup per Volunteer
+        // per Task, and one live Signup per code.
+        if ((error as { constraint?: string }).constraint === "one_live_find_code") {
+          if (attempt < 5) continue;
+          throw error;
+        }
         throw new ConflictError("already_signed_up", "You are already on the list for this task.");
       }
-      throw error;
     }
   });
 }
@@ -423,4 +476,52 @@ export async function setVolunteerDone(
     if (!row) throw new Error("setVolunteerDone updated no row");
     return toSignup(row);
   });
+}
+
+/**
+ * Reaching a Signup again with the short code and the phone number that
+ * claimed it.
+ *
+ * Both must match, which is the whole design: the code stops being a secret
+ * and becomes a lookup key, and the number is the proof. A bare six-digit
+ * code would be a downgrade rather than a convenience, because the page it
+ * opens can cancel somebody's commitment and shows their name.
+ *
+ * Every failure is the same failure. A code that never existed, a code
+ * belonging to somebody else, a mistyped number and a Slot that has already
+ * been released all return null, so nothing here can be used to find out
+ * whether a code or a number is in use.
+ *
+ * Live Signups only. A released one keeps its row but gives its code up: the
+ * long link still shows that it was released, which is the honest place for
+ * that, and the code can belong to somebody else later.
+ *
+ * Never a page that lists a person's Signups from a phone number alone. That
+ * was ruled out early - numbers here are unverified, so anybody who knew a
+ * congregant's number could see and cancel their commitments - and it stays
+ * ruled out: this takes both and returns exactly one Signup.
+ */
+export async function findSignupByCode(code: string, phone: string): Promise<Signup | null> {
+  const normalizedCode = normalizeFindCode(code);
+  if (normalizedCode === null) return null;
+
+  let normalizedPhone: string;
+  try {
+    normalizedPhone = normalizePhone(phone);
+  } catch {
+    // An unreadable number is simply a number that matches nothing. Saying
+    // "that is not a phone number" here would be a different answer from
+    // "those do not match", and the two must be indistinguishable.
+    return null;
+  }
+
+  const { rows } = await db().query<SignupRow>(
+    `select * from signups
+      where find_code = $1
+        and volunteer_phone = $2
+        and cancelled_at is null`,
+    [normalizedCode, normalizedPhone],
+  );
+  const row = rows[0];
+  return row ? toSignup(row) : null;
 }

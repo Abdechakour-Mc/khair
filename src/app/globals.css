@@ -704,3 +704,33 @@ body {
 .done-block .hint {
   margin-block-start: 6px;
 }
+
+/* The short code, on the page they were told to save. Big and spaced, so it
+   can be read off a phone and written down without a mistake. */
+.code-block {
+  margin-block-start: 20px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+}
+
+.code-label {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.code-value {
+  margin: 4px 0 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.code-block .hint {
+  margin-block-start: 8px;
+}

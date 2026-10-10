@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { CalendarLinks } from "@/components/CalendarLinks";
 import { mosqueIdentity } from "@/config/mosque";
-import { findSignupByCancelToken } from "@/core/signups";
+import { findSignupByCancelToken, formatFindCode } from "@/core/signups";
 import { getTaskWithSlots, hasHappened } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
@@ -91,6 +91,18 @@ export default async function SignupConfirmation({
             <p>{m.confirmedKeepLink}</p>
             {mosque.name ? <p className="hint">{m.heldBy(mosque.name)}</p> : null}
           </div>
+
+          {/* Six digits they can write on a scrap of paper, because the link
+              is 32 characters of randomness: excellent security and poor
+              memory. The code is a lookup key and not a secret, which is why
+              finding a signup with it also asks for the phone number. */}
+          {signup.findCode ? (
+            <div className="code-block">
+              <p className="code-label">{m.codeLabel}</p>
+              <p className="code-value">{formatFindCode(signup.findCode)}</p>
+              <p className="hint">{m.codeKeep}</p>
+            </div>
+          ) : null}
 
           {problem && problem in m.problems ? (
             <p className="problem problem-block" role="alert">

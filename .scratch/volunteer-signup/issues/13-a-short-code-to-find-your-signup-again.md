@@ -11,7 +11,7 @@ losing the way to cancel, which is the whole reason this app exists.
 
 **Blocked by:** None (can start immediately).
 
-**Status:** blocked on a decision, see below
+**Status:** done — decision taken, see below
 
 ## The decision this ticket needs
 
@@ -40,7 +40,19 @@ digits.
 blocked operationally rather than mathematically. Needs per-IP and per-code
 attempt tracking, which is the only option here that adds infrastructure.
 
-**Recommendation: (a).** It is the only one that stays strong as the mosque
+**Decided: (a), code plus phone number.** Asked to choose, the answer was
+code plus phone. So the code is a lookup key rather than a secret, six digits
+long, and the phone number they have already typed once is the proof.
+
+Two consequences worth recording. The "avoid characters misread by hand"
+requirement is satisfied by construction rather than by a careful alphabet:
+digits only means there is no O to confuse with 0 and no I to confuse with 1,
+and six digits can be read down the phone without spelling anything. And
+uniqueness is enforced among live Signups only, by a partial unique index, so
+a released Slot gives its code up and the code may belong to somebody else
+later - which is also why looking one up matches live Signups only.
+
+**Original recommendation: (a).** It is the only one that stays strong as the mosque
 grows, the extra field is a number the Volunteer has already typed once, and it
 composes with ticket 14 rather than fighting it.
 
@@ -49,14 +61,14 @@ that person's Signups. That was ruled out early and for good reason, and it
 stays ruled out: phone numbers here are unverified, so anyone who knows a
 congregant's number would be able to see and cancel their commitments.
 
-- [ ] A Volunteer is shown a short code on the confirmation page, alongside the
+- [x] A Volunteer is shown a short code on the confirmation page, alongside the
       link, in a form that is easy to read aloud or write down
-- [ ] A page lets them reach their Signup again with that code
-- [ ] Reaching a Signup requires the chosen second factor, per the decision above
-- [ ] The long Cancel Token link keeps working unchanged, for anyone who did
+- [x] A page lets them reach their Signup again with that code
+- [x] Reaching a Signup requires the chosen second factor, per the decision above
+- [x] The long Cancel Token link keeps working unchanged, for anyone who did
       save it
-- [ ] A wrong code and a code that never existed fail identically
-- [ ] Codes are unique among live Signups and are not reused while one is live
-- [ ] Codes avoid characters that are misread by hand (O/0, I/1)
-- [ ] Covered at the core seam, including a wrong second factor and an expired
+- [x] A wrong code and a code that never existed fail identically
+- [x] Codes are unique among live Signups and are not reused while one is live
+- [x] Codes avoid characters that are misread by hand (O/0, I/1)
+- [x] Covered at the core seam, including a wrong second factor and an expired
       or released Signup
