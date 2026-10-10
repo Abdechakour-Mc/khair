@@ -1,16 +1,35 @@
-import { listTasksForAdmin } from "@/core/tasks";
+import { listDeletedTasks, listTasksForAdmin, undoWindowMinutes } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { signOutAction } from "../actions";
 import { requireAdminSession } from "../session";
+import { restoreTaskAction } from "./[id]/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminTaskList() {
+const PROBLEM_LABEL: Record<string, string> = {
+  undo_expired: "That task can no longer be brought back. The undo window had passed.",
+  task_missing: "That task is no longer there.",
+};
+
+export default async function AdminTaskList({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    deleted?: string;
+    title?: string;
+    done?: string;
+    problem?: string;
+    signups?: string;
+    volunteers?: string;
+  }>;
+}) {
   await requireAdminSession();
 
+  const { deleted, title, done, problem, signups, volunteers } = await searchParams;
   const timeZone = appTimeZone();
   const tasks = await listTasksForAdmin();
+  const recentlyDeleted = await listDeletedTasks();
   const now = Date.now();
 
   const upcoming = tasks.filter((task) => task.dueBy.getTime() > now);
@@ -24,6 +43,9 @@ export default async function AdminTaskList() {
     <>
       <div className="topbar">
         <span className="wordmark">Khair admin</span>
+        <a className="linkish" href="/admin/data">
+          Data
+        </a>
         <form action={signOutAction}>
           <button type="submit" className="linkish">
             Sign out
@@ -40,6 +62,39 @@ export default async function AdminTaskList() {
           {urgent > 0 ? ` ${urgent} marked urgent.` : null}
         </p>
       </div>
+
+      {problem ? (
+        <div className="empty" role="alert">
+          <p>{PROBLEM_LABEL[problem] ?? "That did not go through. Nothing was changed."}</p>
+        </div>
+      ) : null}
+
+      {done === "forget" ? (
+        <div className="empty" role="status">
+          <p>
+            Forgotten. Deleted {signups ?? 0} signups and {volunteers ?? 0} volunteer records.
+            Nothing here mentions them any more.
+          </p>
+        </div>
+      ) : null}
+
+      {/* The undo, where the Admin lands after deleting. Offered rather than
+          asked for beforehand: a dialog interrupts everyone to prevent a rare
+          mistake, an undo rescues the mistake without stopping anybody. */}
+      {recentlyDeleted.map((task) => (
+        <div className="empty undo-band" role="status" key={task.id}>
+          <p>
+            Deleted <strong>{task.id === deleted && title ? title : task.title}</strong> and its
+            signups. You can still bring it back for {undoWindowMinutes()} minutes.
+          </p>
+          <form action={restoreTaskAction}>
+            <input type="hidden" name="id" value={task.id} />
+            <button type="submit" className="action action-quiet">
+              Undo
+            </button>
+          </form>
+        </div>
+      ))}
 
       <p className="backlink">
         <a className="action" href="/admin/tasks/new">

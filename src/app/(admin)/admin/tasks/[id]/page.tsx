@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { listSignupsForTask } from "@/core/signups";
-import { getTaskWithSlots, happensAt, hasHappened } from "@/core/tasks";
+import { getTaskWithSlots, happensAt, hasHappened, undoWindowMinutes } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { describeLeadTime, formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { requireAdminSession } from "../../session";
-import { setOutcomeAction, setTaskClosedAction } from "./actions";
+import { deleteTaskAction, setOutcomeAction, setTaskClosedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +122,24 @@ export default async function AdminTaskDetail({
           </p>
         </div>
       ) : null}
+
+      {/* Deleting is for a task that should never have been published. If the
+          work is simply not happening, calling it off is the better tool: it
+          keeps the signups, so you still know who to tell. */}
+      <div className="admin-controls admin-controls-quiet">
+        <form action={deleteTaskAction}>
+          <input type="hidden" name="id" value={task.id} />
+          <input type="hidden" name="title" value={task.title} />
+          <button type="submit" className="linkish linkish-destructive">
+            Delete this task
+          </button>
+        </form>
+        <p className="hint">
+          Deletes the task and its {live.length === 1 ? "1 signup" : `${live.length} signups`}.
+          You can undo it for {undoWindowMinutes()} minutes. To call the work off and keep the
+          signups, use the button above instead.
+        </p>
+      </div>
 
       <h2 className="day-heading">Who is coming</h2>
       {live.length === 0 ? (

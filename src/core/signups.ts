@@ -115,7 +115,9 @@ async function lockTaskForClaim(client: PoolClient, taskId: string): Promise<Loc
   }
 
   const { rows } = await client.query<LockedTask & { closed: boolean; due_by: Date }>(
-    "select id, slots_needed, closed, due_by from tasks where id = $1 for update",
+    `select id, slots_needed, closed, due_by from tasks
+      where id = $1 and deleted_at is null
+        for update`,
     [taskId],
   );
 
@@ -296,6 +298,7 @@ export async function volunteerHistory(
        from signups s
        join tasks t on t.id = s.task_id
       where s.volunteer_phone = $1
+        and t.deleted_at is null
       order by t.due_by desc
       limit $2`,
     [phone, limit],

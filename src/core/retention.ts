@@ -1,4 +1,5 @@
-import { inTransaction } from "./db";
+import { db, inTransaction } from "./db";
+import { undoWindowMinutes } from "./tasks";
 
 export type PurgeResult = {
   signupsDeleted: number;
@@ -33,6 +34,71 @@ export function retentionCutoff(now: Date, months: number): Date {
   cutoff.setUTCDate(Math.min(day, lastDayOfThatMonth));
 
   return cutoff;
+}
+
+/**
+ * What the purge would delete if it ran now, without deleting it.
+ *
+ * Counted and shown first, because a destructive action should say what it is
+ * about to do in numbers: an Admin who expected three and is told four
+ * hundred has learned something before pressing it.
+ */
+export async function previewPurge(
+  now: Date = new Date(),
+  months: number = retentionMonths(),
+): Promise<{ signups: number; volunteers: number }> {
+  const cutoff = retentionCutoff(now, months);
+
+  const { rows } = await db().query<{ signups: string; volunteers: string }>(
+    `with doomed as (
+       select s.id, s.volunteer_phone
+         from signups s
+         join tasks t on t.id = s.task_id
+        where t.due_by < $1
+     )
+     select
+       (select count(*) from doomed) as signups,
+       (select count(*) from volunteers v
+         where not exists (
+           select 1 from signups s
+            where s.volunteer_phone = v.phone
+              and s.id not in (select id from doomed)
+         )) as volunteers`,
+    [cutoff],
+  );
+
+  return {
+    signups: Number(rows[0]?.signups ?? 0),
+    volunteers: Number(rows[0]?.volunteers ?? 0),
+  };
+}
+
+/**
+ * Finishes the Tasks the Admin deleted, once their undo window has passed.
+ *
+ * Separate from the retention purge on purpose: they answer to two different
+ * policies, six months and half an hour, and nothing good comes of one
+ * function that means both. Both are called from the same three places: the
+ * schedule, the command line, and the Admin's own page.
+ */
+export async function finaliseDeletedTasks(
+  now: Date = new Date(),
+): Promise<{ tasksDeleted: number; signupsDeleted: number }> {
+  return inTransaction(async (client) => {
+    const cutoff = new Date(now.getTime() - undoWindowMinutes() * 60000);
+
+    const signups = await client.query(
+      `delete from signups
+        where task_id in (select id from tasks where deleted_at < $1)`,
+      [cutoff],
+    );
+    const tasks = await client.query("delete from tasks where deleted_at < $1", [cutoff]);
+
+    return {
+      tasksDeleted: tasks.rowCount ?? 0,
+      signupsDeleted: signups.rowCount ?? 0,
+    };
+  });
 }
 
 /**

@@ -224,6 +224,39 @@ body {
   background: var(--covered-bg);
 }
 
+/* Destructive controls read as links rather than buttons, so they never
+   compete with the one action a page is actually for. Coloured, not shouted:
+   the warning is in the words and the page they lead to. */
+.linkish-destructive {
+  color: var(--urgent-ink);
+}
+
+/* Everything that can destroy something sits in one quiet group, below the
+   ordinary controls. */
+.admin-controls-quiet {
+  margin-block-start: 28px;
+  padding-block-start: 16px;
+  border-block-start: 1px solid var(--line);
+  display: block;
+}
+
+.admin-controls-quiet .hint {
+  margin-block-start: 6px;
+}
+
+/* The undo, where the Admin lands after deleting something. */
+.undo-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.undo-band p {
+  margin: 0;
+}
+
 .spots.urgent {
   color: var(--urgent-ink);
   background: var(--urgent-bg);

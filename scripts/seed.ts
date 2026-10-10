@@ -66,7 +66,27 @@ async function seed() {
     dueBy: at(210),
   });
 
-  console.log("seeded 6 tasks");
+  // The two fields a developer is most likely to get wrong by not seeing
+  // them: who the work is for, and the urgent pin at the top of the list.
+  await publishTask({
+    title: "Sisters' entrance welcome desk",
+    description: "Greeting people and handing out the class timetable.",
+    location: "Sisters' entrance",
+    openTo: "sisters",
+    startsAt: at(27),
+    dueBy: at(30),
+    slotsNeeded: 2,
+  });
+
+  await publishTask({
+    title: "Drive a family home from the hospital",
+    description: "Tomorrow afternoon, somewhere with room for a wheelchair.",
+    location: "From the General",
+    urgent: true,
+    dueBy: at(20),
+  });
+
+  console.log("seeded 8 tasks");
 }
 
 seed()

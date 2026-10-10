@@ -133,6 +133,8 @@ const en: Messages = {
     task_happened: "That task has already taken place.",
     signup_missing: "That link does not match a signup.",
     signup_released: "That spot has already been released.",
+    confirmation_mismatch: "That does not match what was asked for.",
+    undo_expired: "That can no longer be undone.",
     unknown: "Something went wrong. Please try again.",
   },
 };
@@ -210,6 +212,8 @@ const ar: Messages = {
     task_happened: "انتهى هذا العمل بالفعل.",
     signup_missing: "هذا الرابط لا يطابق أي تسجيل.",
     signup_released: "تم التراجع عن هذا المكان بالفعل.",
+    confirmation_mismatch: "لا يطابق المطلوب.",
+    undo_expired: "لم يعد بالإمكان التراجع عن هذا.",
     unknown: "حدث خطأ. حاول مرة أخرى.",
   },
 };
@@ -292,6 +296,8 @@ const fr: Messages = {
     task_happened: "Cette tâche a déjà eu lieu.",
     signup_missing: "Ce lien ne correspond à aucune inscription.",
     signup_released: "Cette place a déjà été libérée.",
+    confirmation_mismatch: "Cela ne correspond pas à ce qui est demandé.",
+    undo_expired: "Cela ne peut plus être annulé.",
     unknown: "Une erreur est survenue. Veuillez réessayer.",
   },
 };

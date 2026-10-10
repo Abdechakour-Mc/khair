@@ -12,7 +12,7 @@ Admin needs to be able to say yes.
 **Blocked by:** None (can start immediately). Worth doing before 09 and 10,
 which add the synthetic data this ticket needs to be able to clear.
 
-**Status:** ready-for-agent
+**Status:** done, except the two moderation boxes that ticket 10 carries
 
 ## The confirmation rule
 
@@ -51,19 +51,19 @@ are trained to tap straight through the dialogs that matter.
 
 ## The actions
 
-- [ ] **Forget one Volunteer.** Deletes that Volunteer and every Signup of
+- [x] **Forget one Volunteer.** Deletes that Volunteer and every Signup of
       theirs, keeping the Tasks. Confirmed by typing their phone number. This
       is the answer to an erasure request, so it must be complete: afterwards no
       page, Outcome or history anywhere mentions them.
-- [ ] **Delete one Task.** Removes the Task and its Signups. Reversible rather
+- [x] **Delete one Task.** Removes the Task and its Signups. Reversible rather
       than confirmed: soft-delete it, and offer an undo for a short window. Use
       the space to point out that calling a Task off already exists and keeps
       the Signups, so an Admin who wanted that reaches for it instead.
-- [ ] **Clear all synthetic data.** Deletes every record whose phone number is
+- [x] **Clear all synthetic data.** Deletes every record whose phone number is
       in the +1 555 01xx block that ticket 09 reserves for fiction, and nothing
       else. Confirmed by typing a phrase. Refuses to touch a number outside that
       block even if asked.
-- [ ] **Run the retention purge by hand.** The same purge the schedule runs,
+- [x] **Run the retention purge by hand.** The same purge the schedule runs,
       triggered from the Admin view, showing the count first.
 
 ## Moderation
@@ -93,20 +93,22 @@ tool needed. A permanent rung may exist at the top of the ladder, but it stays
 private, stays recorded, and stays liftable by the Admin.
 
 - [ ] Moderation is graduated: the pause from ticket 10 is the ordinary tool,
-      and anything heavier is an explicit further step
-- [ ] Every moderation action is reversible by the Admin
+      and anything heavier is an explicit further step — carried by ticket 10
+- [ ] Every moderation action is reversible by the Admin — carried by ticket 10
 - [ ] Nothing about a restriction is ever shown publicly, and no page reveals
-      that restriction exists
-- [ ] Each moderation action is recorded with what changed and when, so it can
-      be explained later
+      that restriction exists — carried by ticket 10
+- [x] Each moderation action is recorded with what changed and when, so it can
+      be explained later — the `admin_actions` table is here, ticket 10 writes
+      its pause and lift into it
 - [ ] Because identity rests on an unverified phone number, any block is a
       request and not an enforcement: the same person with a new number is a new
       Volunteer. Never describe it in the code or the UI as if it were airtight.
+      — carried by ticket 10
 
 ## Afterwards
 
-- [ ] Every destructive core function is covered at the seam, including that it
+- [x] Every destructive core function is covered at the seam, including that it
       destroys exactly what it said it would and nothing adjacent
-- [ ] A cancelled confirmation destroys nothing
-- [ ] Destructive actions are refused without a valid Admin session, like every
+- [x] A cancelled confirmation destroys nothing
+- [x] Destructive actions are refused without a valid Admin session, like every
       other Admin route

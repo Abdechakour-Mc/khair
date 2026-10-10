@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { purgeExpiredSignups, retentionMonths } from "@/core/retention";
+import { finaliseDeletedTasks, purgeExpiredSignups, retentionMonths } from "@/core/retention";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +23,13 @@ function authorised(request: NextRequest): boolean {
 }
 
 /**
- * Runs the retention purge. Called on a schedule (see vercel.json) so nobody
+ * Runs the retention purge, and finishes any Task the Admin deleted whose
+ * undo window has passed. Called on a schedule (see vercel.json) so nobody
  * has to remember it, and by hand with `npm run purge` when needed.
+ *
+ * Two policies, one schedule: six months for personal data, half an hour for
+ * a deletion the Admin asked for. Nothing else is watching the deleted Tasks,
+ * so if this stopped running they would wait rather than vanish.
  */
 export async function GET(request: NextRequest) {
   if (!authorised(request)) {
@@ -32,5 +37,10 @@ export async function GET(request: NextRequest) {
   }
 
   const result = await purgeExpiredSignups();
-  return NextResponse.json({ ...result, retentionMonths: retentionMonths() });
+  const finalised = await finaliseDeletedTasks();
+  return NextResponse.json({
+    ...result,
+    tasksFinalised: finalised.tasksDeleted,
+    retentionMonths: retentionMonths(),
+  });
 }

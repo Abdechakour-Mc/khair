@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ADMIN_COOKIE, sessionIsValid } from "@/core/admin";
 import { ConflictError } from "@/core/errors";
 import { setOutcome } from "@/core/signups";
-import { setTaskClosed } from "@/core/tasks";
+import { deleteTask, restoreTask, setTaskClosed } from "@/core/tasks";
 
 /**
  * Sends the Admin back to the Task they were looking at, carrying a problem
@@ -43,6 +43,47 @@ export async function setTaskClosedAction(formData: FormData): Promise<void> {
     throw error;
   }
   backToTask(id);
+}
+
+/**
+ * Deletes a Task and the Signups on it.
+ *
+ * Not confirmed, because it is reversible: the undo on the task list is the
+ * safety net, which is both what WCAG 2.2 3.3.4 accepts and what the
+ * long-standing finding on undo-versus-confirm recommends. Adding a dialog
+ * here is how people are trained to tap straight through the dialogs that
+ * matter.
+ */
+export async function deleteTaskAction(formData: FormData): Promise<void> {
+  const jar = await cookies();
+  if (!sessionIsValid(jar.get(ADMIN_COOKIE)?.value)) redirect("/admin");
+
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "");
+
+  try {
+    await deleteTask(id);
+  } catch (error) {
+    if (error instanceof ConflictError) backToTask(id, error);
+    throw error;
+  }
+  redirect(`/admin/tasks?deleted=${encodeURIComponent(id)}&title=${encodeURIComponent(title)}`);
+}
+
+/** The undo. Brings back the Task and everybody who had claimed a Slot. */
+export async function restoreTaskAction(formData: FormData): Promise<void> {
+  const jar = await cookies();
+  if (!sessionIsValid(jar.get(ADMIN_COOKIE)?.value)) redirect("/admin");
+
+  const id = String(formData.get("id") ?? "");
+
+  try {
+    await restoreTask(id);
+  } catch (error) {
+    if (error instanceof ConflictError) redirect(`/admin/tasks?problem=${error.reason}`);
+    throw error;
+  }
+  redirect(`/admin/tasks/${id}`);
 }
 
 /**

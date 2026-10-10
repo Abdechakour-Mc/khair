@@ -38,7 +38,9 @@ export type ConflictReason =
   | "task_missing"
   | "task_happened"
   | "signup_missing"
-  | "signup_released";
+  | "signup_released"
+  | "confirmation_mismatch"
+  | "undo_expired";
 
 /** The request was sound but the world moved on: a Slot was taken, a Task closed. */
 export class ConflictError extends Error {

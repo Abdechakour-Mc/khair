@@ -1,6 +1,21 @@
+import { recordAdminAction } from "./audit";
 import { db, inTransaction } from "./db";
 import { ConflictError, ValidationError, type ValidationCode } from "./errors";
 import { isUuid } from "./ids";
+
+/**
+ * How long a deleted Task can be brought back.
+ *
+ * Deleting a Task is reversible rather than confirmed, which is what WCAG 2.2
+ * 3.3.4 accepts and what the usability finding on undo-versus-confirm
+ * recommends: a dialog interrupts everyone to prevent a rare mistake, an undo
+ * lets the common case run and still rescues the mistake. Long enough to
+ * notice the mistake, short enough that "deleted" means deleted.
+ */
+export function undoWindowMinutes(): number {
+  const configured = Number.parseInt(process.env.UNDO_WINDOW_MINUTES ?? "", 10);
+  return Number.isInteger(configured) && configured > 0 ? configured : 30;
+}
 
 /**
  * Who a Task is open to. A fact about the work, never about the person
@@ -181,7 +196,10 @@ export async function publishTask(input: PublishTaskInput): Promise<Task> {
 }
 
 export async function getTask(id: string): Promise<Task | null> {
-  const { rows } = await db().query<TaskRow>("select * from tasks where id = $1", [id]);
+  const { rows } = await db().query<TaskRow>(
+    "select * from tasks where id = $1 and deleted_at is null",
+    [id],
+  );
   const row = rows[0];
   return row ? toTask(row) : null;
 }
@@ -203,6 +221,7 @@ export async function listOpenTasks(now: Date = new Date()): Promise<OpenTask[]>
        ) live on live.task_id = t.id
       where t.due_by > $1
         and t.closed = false
+        and t.deleted_at is null
       order by (t.starts_at is null), coalesce(t.starts_at, t.due_by), t.created_at`,
     [now],
   );
@@ -238,7 +257,8 @@ export async function getTaskWithSlots(id: string): Promise<OpenTask | null> {
           where cancelled_at is null
           group by task_id
        ) live on live.task_id = t.id
-      where t.id = $1`,
+      where t.id = $1
+        and t.deleted_at is null`,
     [id],
   );
 
@@ -272,6 +292,7 @@ export async function listTasksForAdmin(now: Date = new Date()): Promise<OpenTas
           where cancelled_at is null
           group by task_id
        ) live on live.task_id = t.id
+      where t.deleted_at is null
       order by (t.due_by <= $1),
                case when t.due_by > $1 then coalesce(t.starts_at, t.due_by) end asc,
                case when t.due_by <= $1 then coalesce(t.starts_at, t.due_by) end desc`,
@@ -331,7 +352,7 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
 
   return inTransaction(async (client) => {
     const { rows: locked } = await client.query<{ id: string }>(
-      "select id from tasks where id = $1 for update",
+      "select id from tasks where id = $1 and deleted_at is null for update",
       [id],
     );
     if (!locked[0]) throw new ConflictError("task_missing", "That task is no longer listed.");
@@ -385,10 +406,91 @@ export async function setTaskClosed(id: string, closed: boolean): Promise<Task> 
   }
 
   const { rows } = await db().query<TaskRow>(
-    "update tasks set closed = $2 where id = $1 returning *",
+    "update tasks set closed = $2 where id = $1 and deleted_at is null returning *",
     [id, closed],
   );
   const row = rows[0];
   if (!row) throw new ConflictError("task_missing", "That task is no longer listed.");
   return toTask(row);
+}
+
+/**
+ * Deletes a Task and, with it, the Signups on it.
+ *
+ * Soft at first: the Task leaves every public and Admin list at once, and the
+ * Signups wait with it, so the undo can bring back exactly what was there.
+ * `finaliseDeletedTasks` finishes the job once the window has passed.
+ *
+ * Calling a Task off is the other thing an Admin might want here, and it is
+ * not the same: that keeps the Signups and the people who hold them, and it
+ * is what to reach for when the work is cancelled rather than mistyped.
+ */
+export async function deleteTask(id: string): Promise<Task> {
+  if (!isUuid(id)) throw new ConflictError("task_missing", "That task is no longer listed.");
+
+  return inTransaction(async (client) => {
+    const { rows } = await client.query<TaskRow>(
+      `update tasks set deleted_at = now()
+        where id = $1 and deleted_at is null
+        returning *`,
+      [id],
+    );
+    const row = rows[0];
+    if (!row) throw new ConflictError("task_missing", "That task is no longer listed.");
+
+    const { rows: counted } = await client.query<{ taken: string }>(
+      "select count(*) as taken from signups where task_id = $1",
+      [id],
+    );
+    await recordAdminAction("delete_task", `${Number(counted[0]?.taken ?? 0)} signups`, client);
+    return toTask(row);
+  });
+}
+
+/** Brings a deleted Task back, whole, inside the undo window. */
+export async function restoreTask(id: string): Promise<Task> {
+  if (!isUuid(id)) throw new ConflictError("task_missing", "That task is no longer listed.");
+
+  return inTransaction(async (client) => {
+    const { rows: found } = await client.query<{ deleted_at: Date | null }>(
+      "select deleted_at from tasks where id = $1 for update",
+      [id],
+    );
+    const existing = found[0];
+    if (!existing || existing.deleted_at === null) {
+      throw new ConflictError("task_missing", "That task was not deleted.");
+    }
+
+    const elapsedMinutes = (Date.now() - existing.deleted_at.getTime()) / 60000;
+    if (elapsedMinutes > undoWindowMinutes()) {
+      // Past the window the Signups may already be gone, so there would be
+      // nothing honest to bring back.
+      throw new ConflictError("undo_expired", "That task can no longer be brought back.");
+    }
+
+    const { rows } = await client.query<TaskRow>(
+      "update tasks set deleted_at = null where id = $1 returning *",
+      [id],
+    );
+    const row = rows[0];
+    if (!row) throw new Error("restoreTask updated no row");
+
+    await recordAdminAction("restore_task", "", client);
+    return toTask(row);
+  });
+}
+
+/**
+ * Tasks the Admin deleted and can still bring back, so a deletion is visibly
+ * undoable rather than silently final.
+ */
+export async function listDeletedTasks(): Promise<Task[]> {
+  const { rows } = await db().query<TaskRow>(
+    `select * from tasks
+      where deleted_at is not null
+        and deleted_at > now() - ($1 || ' minutes')::interval
+      order by deleted_at desc`,
+    [undoWindowMinutes()],
+  );
+  return rows.map(toTask);
 }
