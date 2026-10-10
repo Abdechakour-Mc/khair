@@ -1,6 +1,7 @@
-import { getTaskWithSlots } from "@/core/tasks";
+import { getTaskWithSlots, withheldFrom } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { icsFile, icsFilename } from "@/view/calendar";
+import { currentViewer } from "@/view/viewer";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,14 @@ export async function GET(
   const { id } = await params;
   const task = await getTaskWithSlots(id);
   if (!task) return new Response("Not found", { status: 404 });
+
+  // The same answer the Task's own page gives. Without this the file is a
+  // way around the early-access window: anybody holding the id could read
+  // the title, place and time of work still being kept back, which is the
+  // one thing ticket 09 says must never leak.
+  if (withheldFrom(task, await currentViewer())) {
+    return new Response("Not found", { status: 404 });
+  }
 
   const url = new URL(request.url);
   const requested = url.searchParams.get("locale") ?? undefined;

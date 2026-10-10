@@ -21,6 +21,10 @@ import { SYNTHETIC_PHONE_PREFIX } from "../src/core/erasure";
  *
  *   docker compose run --rm web npm run demo:seed
  *   docker compose run --rm web npm run demo:clear
+ *
+ * Not re-runnable on top of itself: a second pass would violate the one
+ * live Signup per Volunteer per Task index halfway through and roll back
+ * with a raw Postgres error. It checks and says so instead.
  */
 
 if (process.env.NODE_ENV === "production") {
@@ -122,6 +126,17 @@ const pastTasks = [
 ];
 
 async function seed(): Promise<void> {
+  const { rows: already } = await db().query<{ tasks: string }>(
+    "select count(*) as tasks from tasks where demo",
+  );
+  if (Number(already[0]?.tasks ?? 0) > 0) {
+    console.error(
+      "demo data is already here. Run npm run demo:clear first, then seed again.",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   await inTransaction(async (client) => {
     const taskIds: string[] = [];
 
@@ -167,7 +182,6 @@ async function seed(): Promise<void> {
         [phone(person.n), person.name, person.trusted, at(-60)],
       );
 
-      person.history.forEach(() => undefined);
       for (const [index, outcome] of person.history.entries()) {
         if (outcome === null) continue;
         const taskId = taskIds[index];

@@ -1,17 +1,11 @@
 import { closeDb } from "../src/core/db";
-import {
-  finaliseDeletedTasks,
-  purgeExpiredSignups,
-  retentionMonths,
-} from "../src/core/retention";
+import { retentionMonths, runScheduledCleanup } from "../src/core/retention";
 
-purgeExpiredSignups()
-  .then(async (result) => {
+runScheduledCleanup()
+  .then((result) => {
     console.log(
-      `retention ${retentionMonths()} months: deleted ${result.signupsDeleted} signups and ${result.volunteersDeleted} volunteers`,
+      `retention ${retentionMonths()} months: deleted ${result.signupsDeleted} signups and ${result.volunteersDeleted} volunteers, and finished ${result.tasksDeleted} deleted tasks`,
     );
-    const finalised = await finaliseDeletedTasks();
-    console.log(`finished ${finalised.tasksDeleted} deleted tasks`);
   })
   .catch((error: unknown) => {
     console.error(error);

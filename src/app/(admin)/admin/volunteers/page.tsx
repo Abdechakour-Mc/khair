@@ -60,7 +60,9 @@ export default async function AdminVolunteers() {
             </div>
             <div className="stat">
               <span className="stat-value">{paused}</span>
-              <span className="stat-label">{paused === 1 ? "paused" : "paused"}</span>
+              <span className="stat-label">
+                {paused === 1 ? "person paused" : "people paused"}
+              </span>
             </div>
           </div>
 

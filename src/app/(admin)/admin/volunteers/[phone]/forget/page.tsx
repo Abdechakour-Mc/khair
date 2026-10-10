@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/AdminNav";
 import { countVolunteerRecords } from "@/core/erasure";
 import { formatPhoneForDisplay } from "@/core/phone";
 import { decodeParam } from "@/view/params";
@@ -30,6 +31,8 @@ export default async function ForgetVolunteer({
 
   return (
     <>
+      <AdminNav current="volunteers" />
+
       <p className="backlink">
         <a href={`/admin/volunteers/${encodeURIComponent(phone)}`}>Back to this volunteer</a>
       </p>

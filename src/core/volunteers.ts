@@ -136,8 +136,11 @@ export async function listVolunteers(now: Date = new Date()): Promise<VolunteerS
     last_signup_at: Date | null;
   }>(
     `select v.phone, v.name, v.trusted, v.paused_at,
-            count(s.id) as signups,
-            count(s.id) filter (where s.outcome = 'no_show') as no_shows,
+            -- Counted through the join, so a Signup on a Task the Admin
+            -- deleted does not inflate the total here while the Volunteer's
+            -- own record page, which filters them out, shows fewer.
+            count(s.id) filter (where t.id is not null) as signups,
+            count(s.id) filter (where t.id is not null and s.outcome = 'no_show') as no_shows,
             count(s.id) filter (where s.cancelled_at is null and t.due_by > $1) as upcoming,
             max(s.created_at) as last_signup_at
        from volunteers v

@@ -243,6 +243,27 @@ describe("a Volunteer's record", () => {
     expect(entry?.pending).toBe(false);
   });
 
+  it("is settled from the moment the work starts, not from its Deadline", async () => {
+    // The Admin can record an outcome as soon as a Task has started, so a
+    // no-show flagged at 10am on work that started at 9 and is due at 5 must
+    // not read as "Not yet" for the rest of the day.
+    const task = await publishTask({
+      title: "A long Friday",
+      startsAt: hoursFromNow(26),
+      dueBy: hoursFromNow(34),
+    });
+    const signup = await claimSlot({ taskId: task.id, ...YUSUF });
+    await db().query(
+      "update tasks set starts_at = now() - interval '1 hour' where id = $1",
+      [task.id],
+    );
+    await setOutcome(signup.id, "no_show");
+
+    const [entry] = await volunteerHistory("+15142849137");
+    expect(entry?.outcome).toBe("no_show");
+    expect(entry?.pending).toBe(false);
+  });
+
   it("counts a released Slot as settled whenever it was released", async () => {
     const task = await publishTask({
       title: "Next Friday's setup",

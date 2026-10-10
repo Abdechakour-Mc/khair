@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/AdminNav";
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { volunteerHistory } from "@/core/signups";
 import { earlyAccessHours } from "@/core/tasks";
@@ -44,6 +45,8 @@ export default async function VolunteerRecord({
 
   return (
     <>
+      <AdminNav current="volunteers" />
+
       <p className="backlink">
         <a href="/admin/volunteers">All people</a>
       </p>

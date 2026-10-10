@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/core/db";
 import { adminOverview, tasksNeedingHelp } from "@/core/overview";
 import { claimSlot, releaseSignup, setOutcome } from "@/core/signups";
+import { runScheduledCleanup } from "@/core/retention";
 import { deleteTask, publishTask } from "@/core/tasks";
 import { listVolunteers, setVolunteerPaused, setVolunteerTrusted } from "@/core/volunteers";
 import { hoursFromNow, resetDb } from "./helpers/db";
@@ -134,6 +135,29 @@ describe("the work that still needs somebody", () => {
   });
 });
 
+describe("the nightly clean-up", () => {
+  it("leaves nobody behind with a number and nothing attached", async () => {
+    // Finalising a deleted Task deletes its Signups. Run after the purge,
+    // that leaves the Volunteer's name and number with no Signups at all,
+    // which is the state the purge exists to prevent.
+    const task = await publishTask({ title: "A mistake", dueBy: hoursFromNow(48) });
+    await claimSlot({ taskId: task.id, ...YUSUF });
+    await deleteTask(task.id);
+    await db().query(
+      "update tasks set deleted_at = now() - interval '2 hours' where id = $1",
+      [task.id],
+    );
+
+    const cleaned = await runScheduledCleanup();
+    expect(cleaned.tasksDeleted).toBe(1);
+
+    const { rows } = await db().query("select 1 from volunteers where phone = $1", [
+      "+15142849137",
+    ]);
+    expect(rows).toHaveLength(0);
+  });
+});
+
 describe("the Admin's list of people", () => {
   it("is empty before anybody has signed up", async () => {
     expect(await listVolunteers()).toEqual([]);
@@ -171,6 +195,19 @@ describe("the Admin's list of people", () => {
     await setVolunteerPaused("+15142849137", true);
 
     expect((await listVolunteers())[0]?.phone).toBe("+15142849137");
+  });
+
+  it("counts the same signups the person's own record page shows", async () => {
+    const kept = await publishTask({ title: "Kept", dueBy: hoursFromNow(48) });
+    const removed = await publishTask({ title: "Deleted later", dueBy: hoursFromNow(48) });
+    await claimSlot({ taskId: kept.id, ...YUSUF });
+    await claimSlot({ taskId: removed.id, ...YUSUF });
+    await deleteTask(removed.id);
+
+    // The record page leaves a deleted Task's signup out, so this must too,
+    // or the two pages disagree about the same person.
+    const [yusuf] = await listVolunteers();
+    expect(yusuf?.signups).toBe(1);
   });
 
   it("keeps somebody who has signed up for nothing yet", async () => {

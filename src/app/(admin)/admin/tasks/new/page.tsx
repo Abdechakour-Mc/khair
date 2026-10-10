@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/AdminNav";
 import { AdminTaskForm } from "@/components/AdminTaskForm";
 import { earlyAccessHours } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
@@ -11,6 +12,8 @@ export default async function NewTask() {
 
   return (
     <>
+      <AdminNav current="tasks" />
+
       <p className="backlink">
         <a href="/admin/tasks">All tasks</a>
       </p>

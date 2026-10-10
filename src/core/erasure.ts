@@ -51,6 +51,28 @@ async function countBy(
   };
 }
 
+/**
+ * Whether what the Admin typed is the number on the record.
+ *
+ * Normalised first, so they can type what the page shows them - "(514)
+ * 284-9137" - rather than E.164. When that fails it falls back to comparing
+ * digits, which is not a loosening: the digits still have to match exactly.
+ * It is what makes this work for a number libphonenumber will not parse,
+ * and the +1 555 01xx block reserved for fiction is exactly that. Without
+ * the fallback, erasing a demo Volunteer was a dead end that always answered
+ * "that is not the same number", in the one flow where being told no without
+ * a reason is worst.
+ */
+function sameNumber(stored: string, typed: string): boolean {
+  try {
+    if (normalizePhone(typed) === stored) return true;
+  } catch {
+    // Unparseable is not the same as wrong, so fall through to the digits.
+  }
+  const digits = (value: string) => value.replace(/\D/g, "");
+  return digits(typed).length > 0 && digits(typed) === digits(stored);
+}
+
 export async function countVolunteerRecords(phone: string): Promise<RecordCount> {
   return inTransaction((client) => countBy(client, "= $1", [phone]));
 }
@@ -94,13 +116,7 @@ export async function countSyntheticRecords(): Promise<SyntheticCount> {
  * what the page shows them - "(514) 284-9137" - rather than E.164.
  */
 export async function forgetVolunteer(phone: string, typed: string): Promise<RecordCount> {
-  let confirmed: string;
-  try {
-    confirmed = normalizePhone(typed);
-  } catch {
-    throw new ConflictError("confirmation_mismatch", "That is not the same number.");
-  }
-  if (confirmed !== phone) {
+  if (!sameNumber(phone, typed)) {
     throw new ConflictError("confirmation_mismatch", "That is not the same number.");
   }
 

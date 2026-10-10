@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/AdminNav";
 import { notFound } from "next/navigation";
 import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { listSignupsForTask } from "@/core/signups";
@@ -52,6 +53,8 @@ export default async function AdminTaskDetail({
 
   return (
     <>
+      <AdminNav current="tasks" />
+
       <p className="backlink">
         <a href="/admin/tasks">All tasks</a>
       </p>

@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { finaliseDeletedTasks, purgeExpiredSignups, retentionMonths } from "@/core/retention";
+import { retentionMonths, runScheduledCleanup } from "@/core/retention";
 
 export const dynamic = "force-dynamic";
 
@@ -36,11 +36,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "not authorised" }, { status: 401 });
   }
 
-  const result = await purgeExpiredSignups();
-  const finalised = await finaliseDeletedTasks();
-  return NextResponse.json({
-    ...result,
-    tasksFinalised: finalised.tasksDeleted,
-    retentionMonths: retentionMonths(),
-  });
+  const result = await runScheduledCleanup();
+  return NextResponse.json({ ...result, retentionMonths: retentionMonths() });
 }

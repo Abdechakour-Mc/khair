@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/AdminNav";
 import { notFound } from "next/navigation";
 import { AdminTaskForm } from "@/components/AdminTaskForm";
 import { getTaskWithSlots } from "@/core/tasks";
@@ -20,6 +21,8 @@ export default async function EditTask({ params }: { params: Promise<{ id: strin
 
   return (
     <>
+      <AdminNav current="tasks" />
+
       <p className="backlink">
         <a href={`/admin/tasks/${task.id}`}>Back to the task</a>
       </p>

@@ -6,7 +6,7 @@ import { ADMIN_COOKIE, sessionIsValid } from "@/core/admin";
 import { recordAdminAction } from "@/core/audit";
 import { clearSyntheticData } from "@/core/erasure";
 import { ConflictError } from "@/core/errors";
-import { finaliseDeletedTasks, purgeExpiredSignups } from "@/core/retention";
+import { runScheduledCleanup } from "@/core/retention";
 
 /**
  * The destructive actions that are not about one person or one Task.
@@ -23,11 +23,10 @@ async function requireSession(): Promise<void> {
 export async function runPurgeAction(): Promise<void> {
   await requireSession();
 
-  const purged = await purgeExpiredSignups();
-  const finalised = await finaliseDeletedTasks();
+  const purged = await runScheduledCleanup();
   await recordAdminAction(
     "purge_by_hand",
-    `${purged.signupsDeleted} signups, ${purged.volunteersDeleted} volunteer records, ${finalised.tasksDeleted} deleted tasks`,
+    `${purged.signupsDeleted} signups, ${purged.volunteersDeleted} volunteer records, ${purged.tasksDeleted} deleted tasks`,
   );
 
   redirect(

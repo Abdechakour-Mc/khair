@@ -102,6 +102,32 @@ export async function finaliseDeletedTasks(
 }
 
 /**
+ * Everything the schedule does, in the one order that works.
+ *
+ * Deleted Tasks are finished FIRST. The other way round, finalising a Task
+ * deletes its Signups after the purge has already counted them, so a
+ * Volunteer whose last Signup was on that Task keeps their name and number
+ * with nothing attached, until the next run a day later. That is exactly the
+ * state the purge exists to prevent, and it would make the retention promise
+ * a claim rather than a fact for a day at a time.
+ *
+ * Called from all three places that clean up: the schedule, the command
+ * line, and the Admin's own button.
+ */
+export async function runScheduledCleanup(
+  now: Date = new Date(),
+): Promise<PurgeResult & { tasksDeleted: number }> {
+  const finalised = await finaliseDeletedTasks(now);
+  const purged = await purgeExpiredSignups(now);
+
+  return {
+    signupsDeleted: purged.signupsDeleted + finalised.signupsDeleted,
+    volunteersDeleted: purged.volunteersDeleted,
+    tasksDeleted: finalised.tasksDeleted,
+  };
+}
+
+/**
  * Forgets names, phone numbers and Outcomes some months after the work is
  * done, so Khair does not quietly accumulate a dossier on the congregation.
  *

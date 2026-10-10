@@ -77,6 +77,42 @@ describe("forgetting one Volunteer", () => {
     expect(result).toEqual({ signups: 1, volunteers: 1 });
   });
 
+  it("works for a number libphonenumber will not parse", async () => {
+    // The +1 555 01xx block reserved for fiction is too short to be a valid
+    // NANP number, so normalising the typed value throws. Erasing a demo
+    // volunteer was a dead end that always answered "not the same number".
+    const task = await taskWithBoth();
+    await db().query("insert into volunteers (phone, name) values ($1, $2)", [
+      "+15550199",
+      "Demo Person",
+    ]);
+    await db().query(
+      `insert into signups (task_id, volunteer_phone, name_snapshot, cancel_token)
+       values ($1, $2, $3, $4)`,
+      [task.id, "+15550199", "Demo Person", "demo-erase-token"],
+    );
+
+    expect(await forgetVolunteer("+15550199", "+15550199")).toEqual({
+      signups: 1,
+      volunteers: 1,
+    });
+  });
+
+  it("still refuses a number that does not match, parseable or not", async () => {
+    const task = await taskWithBoth();
+    await db().query(
+      "insert into volunteers (phone, name) values ('+15550199', 'Demo Person')",
+    );
+    void task;
+
+    await expect(forgetVolunteer("+15550199", "+15550198")).rejects.toMatchObject({
+      reason: "confirmation_mismatch",
+    });
+    await expect(forgetVolunteer("+15550199", "")).rejects.toMatchObject({
+      reason: "confirmation_mismatch",
+    });
+  });
+
   it("leaves nothing behind in any history or list", async () => {
     const task = await taskWithBoth();
 

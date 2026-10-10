@@ -394,10 +394,12 @@ export async function volunteerHistory(
     id: string;
     title: string;
     due_by: Date;
+    happens_at: Date;
     outcome: Signup["outcome"];
     cancelled_at: Date | null;
   }>(
-    `select s.id, t.title, t.due_by, s.outcome, s.cancelled_at
+    `select s.id, t.title, t.due_by, coalesce(t.starts_at, t.due_by) as happens_at,
+            s.outcome, s.cancelled_at
        from signups s
        join tasks t on t.id = s.task_id
       where s.volunteer_phone = $1
@@ -413,7 +415,11 @@ export async function volunteerHistory(
     taskDueBy: row.due_by,
     outcome: row.outcome,
     cancelledAt: row.cancelled_at,
-    pending: row.cancelled_at === null && row.due_by.getTime() > now.getTime(),
+    // Measured from the same moment as `hasHappened`, which is what decides
+    // whether the Admin can record an outcome at all. Keyed on the Deadline
+    // instead, a no-show recorded at 10am on a task that started at 9 and is
+    // due at 5 would read as "Not yet" for the rest of the day.
+    pending: row.cancelled_at === null && row.happens_at.getTime() > now.getTime(),
   }));
 }
 
