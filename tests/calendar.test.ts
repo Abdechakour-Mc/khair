@@ -53,7 +53,7 @@ describe("the Google Calendar link", () => {
   it("carries the title, the time and the place", () => {
     const url = new URL(googleCalendarUrl(fixed, { timeZone: MONTREAL, site: SITE }));
 
-    expect(url.origin + url.pathname).toBe("https://calendar.google.com/calendar/render");
+    expect(url.origin + url.pathname).toBe("https://www.google.com/calendar/render");
     expect(url.searchParams.get("action")).toBe("TEMPLATE");
     expect(url.searchParams.get("text")).toBe("Jumu'ah hall setup");
     expect(url.searchParams.get("location")).toBe("Main hall");

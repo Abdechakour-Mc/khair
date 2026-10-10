@@ -86,6 +86,12 @@ function eventDetails(task: CalendarTask, options: CalendarOptions): string {
  * A prefilled Google Calendar entry. A link rather than an integration: no
  * account to connect, nothing to authorise, and it works for anybody signed
  * in on their phone.
+ *
+ * www.google.com and not calendar.google.com: on an iPhone with the Google
+ * Calendar app, a tap on a calendar.google.com link opens the app, which
+ * drops every field and shows an empty calendar. www.google.com is not
+ * claimed by the app, so the tap stays in the browser, and Google's redirect
+ * carries the fields through to the prefilled page.
  */
 export function googleCalendarUrl(task: CalendarTask, options: CalendarOptions): string {
   const event = taskEvent(task, options.timeZone);
@@ -102,7 +108,7 @@ export function googleCalendarUrl(task: CalendarTask, options: CalendarOptions):
   });
   if (task.location.trim()) params.set("location", task.location.trim());
 
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  return `https://www.google.com/calendar/render?${params.toString()}`;
 }
 
 /**
