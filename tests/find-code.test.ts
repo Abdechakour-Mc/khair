@@ -53,6 +53,19 @@ describe("the code a Volunteer is given", () => {
     expect(second.findCode).not.toBe(signup.findCode);
   });
 
+  it("names the index when a code collides, which the retry depends on", async () => {
+    const { task, signup } = await claimed();
+    const second = await claimSlot({ taskId: task.id, ...KHADIJA });
+
+    // claimSlot retries only when it recognises this constraint by name, and
+    // treats every other unique violation as "already signed up". If
+    // Postgres stopped reporting the index name here, a collision would be
+    // reported to a volunteer as being already on the list.
+    await expect(
+      db().query("update signups set find_code = $2 where id = $1", [second.id, signup.findCode]),
+    ).rejects.toMatchObject({ code: "23505", constraint: "one_live_find_code" });
+  });
+
   it("is unique among live Signups", async () => {
     const { task, signup } = await claimed();
     // Taking the one code that is in use is refused by the database, which
