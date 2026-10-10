@@ -151,7 +151,7 @@ cat > "$OUT_DIR/khair-poster.html" <<POSTER
 <body>
   <div class="sheet">
     <p class="mosque">$MOSQUE</p>
-    <h1>Where help is needed</h1>
+    <h1>Volunteer with us</h1>
 
     <div class="lines">
       <span class="ar">امسح الرمز لترى أين تلزم المساعدة</span>
@@ -164,7 +164,7 @@ cat > "$OUT_DIR/khair-poster.html" <<POSTER
     <p class="url">$URL</p>
 
     <p class="foot">
-      Pick anything you can manage. Nobody will ask you, and nobody is told what you did not take.
+      Pick anything you can manage.
       <span class="ar">وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَى</span>
     </p>
   </div>
