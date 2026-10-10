@@ -37,6 +37,9 @@ services:
       # Days are grouped in the mosque's own timezone, not the server's.
       APP_TIMEZONE: America/Toronto
       RETENTION_MONTHS: "6"
+      # Where this deployment answers, for the links inside a saved calendar
+      # entry. Left empty locally, where the Host header is trustworthy.
+      APP_ORIGIN: ""
       # How long trusted volunteers see important work before everybody else.
       EARLY_ACCESS_HOURS: "24"
       # How long a deleted task can be brought back before the purge finishes it.
