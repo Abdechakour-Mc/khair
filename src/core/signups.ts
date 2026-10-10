@@ -189,3 +189,94 @@ export async function listSignupsForTask(taskId: string): Promise<Signup[]> {
   );
   return rows.map(toSignup);
 }
+
+/** What the Admin is allowed to record. 'cancelled' is the Volunteer's to set. */
+export type AdminOutcome = "done" | "no_show";
+
+/**
+ * The Admin's private record of how a Signup ended.
+ *
+ * Every Signup already counts as done, so a normal week costs the Admin no
+ * input at all and only the exceptions are ever touched. Always correctable:
+ * nothing here is append-only, and one mistaken tap must not permanently
+ * misrepresent somebody.
+ */
+export async function setOutcome(signupId: string, outcome: AdminOutcome): Promise<Signup> {
+  if (outcome !== "done" && outcome !== "no_show") {
+    throw new ConflictError(
+      "signup_released",
+      "Only the volunteer can mark a signup cancelled, by releasing their own slot.",
+    );
+  }
+  if (!/^[0-9a-f-]{36}$/i.test(signupId ?? "")) {
+    throw new ConflictError("signup_missing", "That signup no longer exists.");
+  }
+
+  return inTransaction(async (client) => {
+    const { rows: found } = await client.query<SignupRow>(
+      "select * from signups where id = $1 for update",
+      [signupId],
+    );
+    const existing = found[0];
+    if (!existing) {
+      throw new ConflictError("signup_missing", "That signup no longer exists.");
+    }
+    // A released Slot's outcome belongs to the Volunteer who released it.
+    if (existing.cancelled_at !== null) {
+      throw new ConflictError("signup_released", "That spot was released by the volunteer.");
+    }
+
+    const { rows } = await client.query<SignupRow>(
+      "update signups set outcome = $2 where id = $1 returning *",
+      [signupId, outcome],
+    );
+    const row = rows[0];
+    if (!row) throw new Error("setOutcome updated no row");
+    return toSignup(row);
+  });
+}
+
+export type VolunteerHistoryEntry = {
+  signupId: string;
+  taskTitle: string;
+  taskDueBy: Date;
+  outcome: Signup["outcome"];
+  cancelledAt: Date | null;
+};
+
+/**
+ * A Volunteer's past Outcomes, so the Admin knows who to count on.
+ *
+ * Deliberately a list and not a tally. A count would be a score, and Khair
+ * has no scores: the Admin reads what happened and judges as a human.
+ */
+export async function volunteerHistory(
+  phone: string,
+  limit = 25,
+): Promise<VolunteerHistoryEntry[]> {
+  if (!phone) return [];
+
+  const { rows } = await db().query<{
+    id: string;
+    title: string;
+    due_by: Date;
+    outcome: Signup["outcome"];
+    cancelled_at: Date | null;
+  }>(
+    `select s.id, t.title, t.due_by, s.outcome, s.cancelled_at
+       from signups s
+       join tasks t on t.id = s.task_id
+      where s.volunteer_phone = $1
+      order by t.due_by desc
+      limit $2`,
+    [phone, limit],
+  );
+
+  return rows.map((row) => ({
+    signupId: row.id,
+    taskTitle: row.title,
+    taskDueBy: row.due_by,
+    outcome: row.outcome,
+    cancelledAt: row.cancelled_at,
+  }));
+}

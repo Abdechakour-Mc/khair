@@ -117,6 +117,7 @@ const en: Messages = {
     task_passed: "This task's deadline has passed.",
     task_missing: "That task is no longer listed.",
     signup_missing: "That link does not match a signup.",
+    signup_released: "That spot has already been released.",
     unknown: "Something went wrong. Please try again.",
   },
 };
@@ -184,6 +185,7 @@ const ar: Messages = {
     task_passed: "انتهى موعد هذا العمل.",
     task_missing: "هذا العمل غير مدرج.",
     signup_missing: "هذا الرابط لا يطابق أي تسجيل.",
+    signup_released: "تم التراجع عن هذا المكان بالفعل.",
     unknown: "حدث خطأ. حاول مرة أخرى.",
   },
 };
@@ -256,6 +258,7 @@ const fr: Messages = {
     task_passed: "L'échéance de cette tâche est passée.",
     task_missing: "Cette tâche n'est plus affichée.",
     signup_missing: "Ce lien ne correspond à aucune inscription.",
+    signup_released: "Cette place a déjà été libérée.",
     unknown: "Une erreur est survenue. Veuillez réessayer.",
   },
 };

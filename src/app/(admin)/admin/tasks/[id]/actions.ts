@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_COOKIE, sessionIsValid } from "@/core/admin";
+import { setOutcome } from "@/core/signups";
 import { setTaskClosed } from "@/core/tasks";
 
 /**
@@ -21,4 +22,22 @@ export async function setTaskClosedAction(formData: FormData): Promise<void> {
 
   await setTaskClosed(id, closed);
   redirect(`/admin/tasks/${id}`);
+}
+
+/**
+ * Records how a Signup ended. Every Signup already counts as done, so this is
+ * only ever used on the exceptions, and it is always reversible.
+ */
+export async function setOutcomeAction(formData: FormData): Promise<void> {
+  const jar = await cookies();
+  if (!sessionIsValid(jar.get(ADMIN_COOKIE)?.value)) redirect("/admin");
+
+  const taskId = String(formData.get("taskId") ?? "");
+  const signupId = String(formData.get("signupId") ?? "");
+  const outcome = String(formData.get("outcome") ?? "");
+
+  if (outcome === "done" || outcome === "no_show") {
+    await setOutcome(signupId, outcome);
+  }
+  redirect(`/admin/tasks/${taskId}`);
 }

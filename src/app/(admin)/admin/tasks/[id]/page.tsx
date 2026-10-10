@@ -3,9 +3,9 @@ import { formatPhoneForDisplay, whatsappHref } from "@/core/phone";
 import { listSignupsForTask } from "@/core/signups";
 import { getTaskWithSlots } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
-import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
+import { describeLeadTime, formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { requireAdminSession } from "../../session";
-import { setTaskClosedAction } from "./actions";
+import { setOutcomeAction, setTaskClosedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,11 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
   const signups = await listSignupsForTask(task.id);
   const live = signups.filter((signup) => signup.cancelledAt === null);
   const released = signups.filter((signup) => signup.cancelledAt !== null);
+
+  // A flexible Task has no start, so a cancellation is measured against its
+  // Deadline instead.
+  const reference = task.startsAt ?? task.dueBy;
+  const hasHappened = reference.getTime() <= Date.now();
 
   return (
     <>
@@ -77,8 +82,8 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
         <div className="empty">
           <p>
             This task is off the public list and cannot be claimed. Anyone who had already
-            claimed a spot is still listed below, and still expects to come: tell them
-            yourself using the numbers here.
+            claimed a spot is still listed below, and still expects to come: tell them yourself
+            using the numbers here.
           </p>
         </div>
       ) : null}
@@ -93,10 +98,17 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
         </div>
       ) : (
         live.map((signup) => (
-          <article className="slot" key={signup.id}>
+          <article className="slot slot-stacked" key={signup.id}>
             <div>
               <div className="slot-head">
-                <h2>{signup.nameSnapshot}</h2>
+                <h2>
+                  <a href={`/admin/volunteers/${encodeURIComponent(signup.volunteerPhone)}`}>
+                    {signup.nameSnapshot}
+                  </a>
+                </h2>
+                {signup.outcome === "no_show" ? (
+                  <span className="spots covered">Did not come</span>
+                ) : null}
               </div>
               {/* One tap is the whole reminder system. A nudge the day before
                   prevents the no-show that a record merely documents, and it
@@ -111,6 +123,24 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
                 </a>
               </p>
             </div>
+
+            {/* Everything counts as done already, so this only ever records an
+                exception, and it goes back with one more tap. Nothing here is
+                shown to the volunteer or added up into a score. */}
+            {hasHappened || task.closed ? (
+              <form action={setOutcomeAction} className="outcome-form">
+                <input type="hidden" name="taskId" value={task.id} />
+                <input type="hidden" name="signupId" value={signup.id} />
+                <input
+                  type="hidden"
+                  name="outcome"
+                  value={signup.outcome === "no_show" ? "done" : "no_show"}
+                />
+                <button type="submit" className="linkish">
+                  {signup.outcome === "no_show" ? "They did come after all" : "Did not come"}
+                </button>
+              </form>
+            ) : null}
           </article>
         ))
       )}
@@ -122,9 +152,23 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
             <article className="slot" key={signup.id}>
               <div>
                 <div className="slot-head">
-                  <h2>{signup.nameSnapshot}</h2>
+                  <h2>
+                    <a href={`/admin/volunteers/${encodeURIComponent(signup.volunteerPhone)}`}>
+                      {signup.nameSnapshot}
+                    </a>
+                  </h2>
                 </div>
-                <p className="detail">{formatPhoneForDisplay(signup.volunteerPhone)}</p>
+                <p className="detail">
+                  {formatPhoneForDisplay(signup.volunteerPhone)}
+                  {signup.cancelledAt ? (
+                    <>
+                      {" · "}
+                      <span className="when">
+                        {describeLeadTime(signup.cancelledAt, reference)}
+                      </span>
+                    </>
+                  ) : null}
+                </p>
               </div>
             </article>
           ))}
