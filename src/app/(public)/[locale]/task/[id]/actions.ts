@@ -1,7 +1,13 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ConflictError, ValidationError } from "@/core/errors";
+import {
+  rememberVolunteer,
+  VOLUNTEER_COOKIE,
+  VOLUNTEER_COOKIE_MAX_AGE,
+} from "@/core/remembered";
 import { claimSlot } from "@/core/signups";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
 import type { ProblemKey } from "@/i18n/messages";
@@ -30,6 +36,23 @@ export async function claimSlotAction(
   try {
     const signup = await claimSlot({ taskId, name, phone });
     cancelToken = signup.cancelToken;
+
+    // Remembered only once a Signup has actually gone through, so a device
+    // that abandoned the form keeps nothing. The number stored is the one the
+    // core normalised, not the one that was typed, so the next visit
+    // prefills what Khair will key them on.
+    const jar = await cookies();
+    jar.set(
+      VOLUNTEER_COOKIE,
+      rememberVolunteer({ name: signup.nameSnapshot, phone: signup.volunteerPhone }),
+      {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: VOLUNTEER_COOKIE_MAX_AGE,
+      },
+    );
   } catch (error) {
     if (error instanceof ValidationError) {
       return { problem: error.code, field: error.field, name, phone };

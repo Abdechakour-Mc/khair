@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { CalendarLinks } from "@/components/CalendarLinks";
 import { SignupForm } from "@/components/SignupForm";
+import { readRememberedVolunteer, VOLUNTEER_COOKIE } from "@/core/remembered";
 import { getTaskWithSlots } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
@@ -23,6 +25,9 @@ export default async function TaskDetail({
   const m = messages[locale];
   const timeZone = appTimeZone();
   const site = await siteOrigin();
+  // A returning Volunteer on this phone finds both fields filled in. A
+  // convenience and nothing more: it grants nothing and proves nothing.
+  const remembered = readRememberedVolunteer((await cookies()).get(VOLUNTEER_COOKIE)?.value);
 
   const audience = openToLabel(task.openTo, m);
   const deadlinePassed = task.dueBy.getTime() <= Date.now();
@@ -96,6 +101,7 @@ export default async function TaskDetail({
             submitting: m.submitting,
             problems: m.problems,
           }}
+          remembered={remembered ?? undefined}
         />
         {/* Offered before signing up as well as after: somebody deciding
             whether they can make it is exactly who needs to see it in their

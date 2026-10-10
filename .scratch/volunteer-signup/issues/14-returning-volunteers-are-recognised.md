@@ -13,9 +13,39 @@ again.
 
 **Blocked by:** 13 (the same decision governs both).
 
-**Status:** blocked on a decision, see below
+**Status:** ready-for-agent — decided, see below
 
-## The decision this ticket needs
+## The decision, taken
+
+**(a) Remember them on their own device.** Asked which of the three to build,
+the answer was "one phone number one user".
+
+That settles both halves of this ticket. The phone number is the identity,
+one number to one person, so the Admin-side merge in (c) has nothing to
+merge: two numbers are two people by definition, and a Volunteer who writes
+their name differently is the same person because the number is the same. And
+(b), verifying by SMS, stays refused — it reverses a founding decision of the
+project and buys nothing that "one number, one person" does not already give.
+
+So: a cookie on that phone, holding the name and number last used there, and
+the next signup form arrives filled in. Both fields stay editable and
+whatever is submitted replaces what was remembered.
+
+**The one thing to be careful about.** A remembered name is a convenience and
+never proof of identity: anybody can put anything in their own cookie. The
+only thing it is allowed to do is save typing.
+
+Ticket 09's early access is the one place that reads it for more than
+prefill, and that is deliberate rather than an exception being smuggled in.
+What early access does on the strength of this cookie is show a Task that
+would have been public a few hours later anyway, holding nothing personal.
+Somebody who forges the cookie sees a cleaning rota early, and the Admin can
+undo their claim. That is the whole exposure, which is why ticket 09 calls
+early access convenience rather than a boundary. Nothing that matters -
+reaching a Signup, releasing a Slot, seeing a record, anything in the Admin
+view - may ever depend on it.
+
+## The decision this ticket needed
 
 "Use the same account for future signups" is the instinct, and it is right about
 the problem. The open question is what proves who someone is, and the honest
@@ -49,14 +79,15 @@ of wanting prefilled forms.
 convenience, never proof of identity. Nothing that matters may depend on it.
 And no page may list a person's Signups from a phone number alone.
 
-- [ ] A returning Volunteer on the same device finds their name and number
+- [x] A returning Volunteer on the same device finds their name and number
       already filled in
-- [ ] They can change either field, and changing it is remembered
-- [ ] Nothing is remembered on a device that never completed a Signup
-- [ ] The remembered values are a convenience only: no page grants access to
+- [x] They can change either field, and changing it is remembered
+- [x] Nothing is remembered on a device that never completed a Signup
+- [x] The remembered values are a convenience only: no page grants access to
       anything on the strength of them
-- [ ] Clearing browser data loses the convenience and nothing else
-- [ ] The Admin can still see one Volunteer's history keyed on the normalised
+- [x] Clearing browser data loses the convenience and nothing else
+- [x] The Admin can still see one Volunteer's history keyed on the normalised
       phone number, as today
 - [ ] If the Admin-side merge is chosen, merging preserves every Signup and
-      every Outcome, and is reversible
+      every Outcome, and is reversible — not chosen: under "one phone number
+      one user" there is nothing to merge

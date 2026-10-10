@@ -26,14 +26,21 @@ export function SignupForm({
   taskId,
   locale,
   labels,
+  remembered,
 }: {
   taskId: string;
   locale: Locale;
   labels: SignupFormLabels;
+  /** What this device remembers, if it has signed somebody up before. */
+  remembered?: { name: string; phone: string };
 }) {
   const [state, formAction, pending] = useActionState<ClaimState, FormData>(claimSlotAction, {});
 
   const problem = state.problem ? labels.problems[state.problem] : undefined;
+  // What came back from a rejected submit wins over what the device
+  // remembers, so a correction is never silently undone.
+  const name = state.name ?? remembered?.name ?? "";
+  const phone = state.phone ?? remembered?.phone ?? "";
   const nameProblem = state.field === "name" ? problem : undefined;
   const phoneProblem = state.field === "phone" ? problem : undefined;
   // A conflict is about the Task, not a field, so it sits above the button.
@@ -53,7 +60,7 @@ export function SignupForm({
           autoComplete="name"
           maxLength={80}
           required
-          defaultValue={state.name ?? ""}
+          defaultValue={name}
           aria-invalid={nameProblem ? true : undefined}
           aria-describedby={nameProblem ? "name-problem" : undefined}
         />
@@ -73,7 +80,7 @@ export function SignupForm({
           inputMode="tel"
           autoComplete="tel"
           required
-          defaultValue={state.phone ?? ""}
+          defaultValue={phone}
           aria-invalid={phoneProblem ? true : undefined}
           aria-describedby={phoneProblem ? "phone-problem" : "phone-hint"}
         />
