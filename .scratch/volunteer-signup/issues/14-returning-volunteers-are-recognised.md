@@ -13,7 +13,7 @@ again.
 
 **Blocked by:** 13 (the same decision governs both).
 
-**Status:** ready-for-agent — decided, see below
+**Status:** done — decision taken, see below
 
 ## The decision, taken
 
