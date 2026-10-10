@@ -162,6 +162,13 @@ export default async function AdminTaskDetail({
                 {signup.outcome === "no_show" ? (
                   <span className="spots covered">Did not come</span>
                 ) : null}
+                {/* Their own word, not your record of them. Shown beside
+                    your outcome rather than instead of it, so somebody who
+                    says they came and whom you marked absent reads as
+                    exactly that disagreement. */}
+                {signup.volunteerDoneAt ? (
+                  <span className="spots audience">Says it is done</span>
+                ) : null}
               </div>
               {/* One tap is the whole reminder system. A nudge the day before
                   prevents the no-show that a record merely documents, and it

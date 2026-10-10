@@ -13,6 +13,14 @@ export type Signup = {
   cancelToken: string;
   outcome: "done" | "cancelled" | "no_show";
   cancelledAt: Date | null;
+  /**
+   * When the Volunteer said they had done the work, and null until they do.
+   *
+   * Never written by the Admin. This is a different fact from `outcome`:
+   * "the Volunteer said they did it" against "the Admin judged this done".
+   * The two are allowed to disagree, and the Admin's page shows both.
+   */
+  volunteerDoneAt: Date | null;
   createdAt: Date;
 };
 
@@ -30,6 +38,7 @@ type SignupRow = {
   cancel_token: string;
   outcome: Signup["outcome"];
   cancelled_at: Date | null;
+  volunteer_done_at: Date | null;
   created_at: Date;
 };
 
@@ -42,6 +51,7 @@ function toSignup(row: SignupRow): Signup {
     cancelToken: row.cancel_token,
     outcome: row.outcome,
     cancelledAt: row.cancelled_at,
+    volunteerDoneAt: row.volunteer_done_at,
     createdAt: row.created_at,
   };
 }
@@ -312,4 +322,73 @@ export async function volunteerHistory(
     cancelledAt: row.cancelled_at,
     pending: row.cancelled_at === null && row.due_by.getTime() > now.getTime(),
   }));
+}
+
+/**
+ * The Volunteer says they have done the work, or takes that back.
+ *
+ * Self-management: the Volunteer closes the loop themselves instead of the
+ * Admin chasing to find out. It matters most on a flexible Task, where
+ * nothing else tells the Admin whether the shoe rack actually got fixed. For
+ * a fixed Task the Admin was usually there; for a flexible one they were not.
+ *
+ * Writes its own column and never `outcome`. That field is the Admin's, and
+ * it already defaults to `done`, so a Volunteer writing to it would change
+ * nothing in the common case and would overwrite the one thing the Admin
+ * owns. The two facts are allowed to disagree: somebody can say they came and
+ * be marked absent, and the Admin's page shows both, because that
+ * disagreement is the thing worth seeing.
+ *
+ * Reversible and idempotent, because people mistap: a second tap keeps the
+ * first timestamp rather than moving it.
+ */
+export async function setVolunteerDone(
+  token: string,
+  done: boolean,
+  now: Date = new Date(),
+): Promise<Signup> {
+  if (!token) throw new ConflictError("signup_missing", "That link does not match a signup.");
+
+  return inTransaction(async (client) => {
+    const { rows } = await client.query<SignupRow & { starts_at: Date | null }>(
+      `select s.*, t.starts_at
+         from signups s
+         join tasks t on t.id = s.task_id
+        where s.cancel_token = $1
+          for update of s`,
+      [token],
+    );
+
+    const existing = rows[0];
+    if (!existing) {
+      throw new ConflictError("signup_missing", "That link does not match a signup.");
+    }
+    // A released Slot is not work anybody did.
+    if (existing.cancelled_at !== null) {
+      throw new ConflictError("signup_released", "That spot has already been released.");
+    }
+
+    // A flexible Task can be finished early and said so at any point. A fixed
+    // one cannot have been done before it started, and taking back a mistaken
+    // tap is always allowed.
+    if (
+      done &&
+      existing.starts_at !== null &&
+      existing.starts_at.getTime() > now.getTime()
+    ) {
+      throw new ConflictError("task_not_started", "That task has not started yet.");
+    }
+
+    // Idempotent: already-said stays said, with its original timestamp.
+    if (done && existing.volunteer_done_at !== null) return toSignup(existing);
+    if (!done && existing.volunteer_done_at === null) return toSignup(existing);
+
+    const { rows: updated } = await client.query<SignupRow>(
+      "update signups set volunteer_done_at = $2 where id = $1 returning *",
+      [existing.id, done ? now : null],
+    );
+    const row = updated[0];
+    if (!row) throw new Error("setVolunteerDone updated no row");
+    return toSignup(row);
+  });
 }

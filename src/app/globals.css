@@ -695,3 +695,12 @@ body {
 .calendar-links .hint {
   margin-block-end: 2px;
 }
+
+/* Saying the work is done: offered quietly, above the way out of the Slot. */
+.done-block {
+  margin-block-start: 20px;
+}
+
+.done-block .hint {
+  margin-block-start: 6px;
+}

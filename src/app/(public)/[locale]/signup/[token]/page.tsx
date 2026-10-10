@@ -7,7 +7,7 @@ import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
 import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { siteOrigin } from "@/view/site";
-import { releaseSignupAction } from "./actions";
+import { releaseSignupAction, setVolunteerDoneAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +20,13 @@ export const dynamic = "force-dynamic";
  */
 export default async function SignupConfirmation({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; token: string }>;
+  searchParams: Promise<{ problem?: string }>;
 }) {
   const { locale, token } = await params;
+  const { problem } = await searchParams;
   if (!isLocale(locale)) notFound();
 
   const m = messages[locale];
@@ -47,6 +50,9 @@ export default async function SignupConfirmation({
   const released = signup.cancelledAt !== null;
   const task = await getTaskWithSlots(signup.taskId);
   const happened = task !== null && hasHappened(task);
+  // A fixed Task that is under way: it can be reported done, even though the
+  // Slot can no longer be released.
+  const started = task?.startsAt != null && task.startsAt.getTime() <= Date.now();
   const timeZone = appTimeZone();
   const site = await siteOrigin();
   const when = task?.startsAt
@@ -85,6 +91,46 @@ export default async function SignupConfirmation({
             <p>{m.confirmedKeepLink}</p>
             {mosque.name ? <p className="hint">{m.heldBy(mosque.name)}</p> : null}
           </div>
+
+          {problem && problem in m.problems ? (
+            <p className="problem problem-block" role="alert">
+              {m.problems[problem as keyof typeof m.problems]}
+            </p>
+          ) : null}
+
+          {/* Closing the loop themselves, instead of the organiser chasing
+              to find out. It matters most on a flexible task, where nobody
+              was there to see it happen. A fixed task cannot be reported done
+              before it has started, so the control waits. */}
+          {task && (task.startsAt === null || started) ? (
+            <div className="done-block">
+              {signup.volunteerDoneAt ? (
+                <>
+                  <p className="hint">{m.markedDone}</p>
+                  <form action={setVolunteerDoneAction}>
+                    <input type="hidden" name="token" value={signup.cancelToken} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="done" value="false" />
+                    <button type="submit" className="linkish">
+                      {m.undoDone}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <form action={setVolunteerDoneAction}>
+                    <input type="hidden" name="token" value={signup.cancelToken} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="done" value="true" />
+                    <button type="submit" className="action action-quiet">
+                      {m.markDone}
+                    </button>
+                  </form>
+                  <p className="hint">{m.markDoneHint}</p>
+                </>
+              )}
+            </div>
+          ) : null}
 
           {/* The whole reminder system: the volunteer's own phone, which
               costs no provider and no message fees. Not offered once the

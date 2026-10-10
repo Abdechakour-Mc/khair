@@ -53,6 +53,10 @@ export type Messages = {
 
   releaseSlot: string;
   releaseTooLate: string;
+  markDone: string;
+  markDoneHint: string;
+  markedDone: string;
+  undoDone: string;
   releasedTitle: string;
   releasedBody: string;
   heldBy: (organisation: string) => string;
@@ -113,6 +117,11 @@ const en: Messages = {
   heldBy: (organisation) =>
     `${organisation} holds your name and number for this task, and uses them for nothing else.`,
   releaseSlot: "Release my spot",
+  markDone: "I have done this",
+  markDoneHint:
+    "Only if it is finished. It saves the organiser asking, and nobody else sees it.",
+  markedDone: "You said you have done this. Thank you.",
+  undoDone: "Actually, not yet",
   releaseTooLate:
     "This task has already taken place, so the spot can no longer be released. If something went wrong, speak to whoever is on the desk.",
   releasedTitle: "Your spot is released",
@@ -137,6 +146,7 @@ const en: Messages = {
     task_passed: "This task's deadline has passed.",
     task_missing: "That task is no longer listed.",
     task_happened: "That task has already taken place.",
+    task_not_started: "That task has not started yet.",
     signup_missing: "That link does not match a signup.",
     signup_released: "That spot has already been released.",
     confirmation_mismatch: "That does not match what was asked for.",
@@ -196,6 +206,10 @@ const ar: Messages = {
   heldBy: (organisation) =>
     `${organisation} يحفظ اسمك ورقمك لهذا العمل فقط، ولا يستخدمهما لغير ذلك.`,
   releaseSlot: "التراجع عن مكاني",
+  markDone: "أنجزتُ هذا العمل",
+  markDoneHint: "فقط إن كان قد انتهى. يوفّر على المسؤول السؤال، ولا يراه أحد غيره.",
+  markedDone: "أخبرتنا أنك أنجزت هذا العمل. شكرًا لك.",
+  undoDone: "لم أنجزه بعد",
   releaseTooLate:
     "انتهى هذا العمل بالفعل، فلم يعد بالإمكان التراجع عن المكان. إن كان هناك خطأ، تحدّث إلى المسؤول.",
   releasedTitle: "تم التراجع عن مكانك",
@@ -219,6 +233,7 @@ const ar: Messages = {
     task_passed: "انتهى موعد هذا العمل.",
     task_missing: "هذا العمل غير مدرج.",
     task_happened: "انتهى هذا العمل بالفعل.",
+    task_not_started: "لم يبدأ هذا العمل بعد.",
     signup_missing: "هذا الرابط لا يطابق أي تسجيل.",
     signup_released: "تم التراجع عن هذا المكان بالفعل.",
     confirmation_mismatch: "لا يطابق المطلوب.",
@@ -282,6 +297,11 @@ const fr: Messages = {
   heldBy: (organisation) =>
     `${organisation} conserve votre nom et votre numéro pour cette tâche uniquement.`,
   releaseSlot: "Libérer ma place",
+  markDone: "C'est fait",
+  markDoneHint:
+    "Seulement si c'est terminé. Cela évite à l'organisateur de demander, et personne d'autre ne le voit.",
+  markedDone: "Vous avez indiqué que c'est fait. Merci.",
+  undoDone: "En fait, pas encore",
   releaseTooLate:
     "Cette tâche a déjà eu lieu, la place ne peut donc plus être libérée. En cas de problème, parlez à la personne à l'accueil.",
   releasedTitle: "Votre place est libérée",
@@ -306,6 +326,7 @@ const fr: Messages = {
     task_passed: "L'échéance de cette tâche est passée.",
     task_missing: "Cette tâche n'est plus affichée.",
     task_happened: "Cette tâche a déjà eu lieu.",
+    task_not_started: "Cette tâche n'a pas encore commencé.",
     signup_missing: "Ce lien ne correspond à aucune inscription.",
     signup_released: "Cette place a déjà été libérée.",
     confirmation_mismatch: "Cela ne correspond pas à ce qui est demandé.",
