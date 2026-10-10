@@ -199,6 +199,7 @@ say "and it is the only database this app will ever need."
 printf '\n'
 open_url "https://neon.tech"
 step "Sign up (GitHub or Google is quickest), then create a project."
+note "  Already made one? Open it instead; nothing here creates a second."
 step "Call it khair. Any region near the mosque is fine."
 step "On the project dashboard, find the connection string."
 printf '\n'
