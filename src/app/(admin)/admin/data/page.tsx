@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/AdminNav";
 import { recentAdminActions } from "@/core/audit";
 import { CLEAR_SYNTHETIC_PHRASE, countSyntheticRecords } from "@/core/erasure";
 import { previewPurge, retentionMonths } from "@/core/retention";
@@ -45,9 +46,7 @@ export default async function AdminData({
 
   return (
     <>
-      <p className="backlink">
-        <a href="/admin/tasks">All tasks</a>
-      </p>
+      <AdminNav current="data" />
 
       <div className="masthead">
         <h1>Data</h1>

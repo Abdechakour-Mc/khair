@@ -96,3 +96,66 @@ export async function setVolunteerPaused(phone: string, paused: boolean): Promis
     return row.paused_at;
   });
 }
+
+/**
+ * Everybody who has ever signed up, for the Admin's own list of people.
+ *
+ * Khair has no accounts to manage: a Volunteer holds no password and no
+ * login, and their phone number is their identity. So this is the closest
+ * thing the app has to a list of people, and it exists to answer the two
+ * questions the Admin actually asks. Who turns up, so who can be relied on
+ * with important work. And who has asked to be forgotten, so their record
+ * can be found and erased.
+ *
+ * A list and never a ranking. The counts are rows, not a score, and nothing
+ * sorts by them: most recent activity first, because that is what the Admin
+ * is usually looking for, with anyone paused surfaced above it, because a
+ * pause is the one state that asks to be reviewed.
+ */
+export type VolunteerSummary = {
+  phone: string;
+  name: string;
+  trusted: boolean;
+  pausedAt: Date | null;
+  signups: number;
+  noShows: number;
+  /** Signups on work that has not happened yet. */
+  upcoming: number;
+  lastSignupAt: Date | null;
+};
+
+export async function listVolunteers(now: Date = new Date()): Promise<VolunteerSummary[]> {
+  const { rows } = await db().query<{
+    phone: string;
+    name: string;
+    trusted: boolean;
+    paused_at: Date | null;
+    signups: string;
+    no_shows: string;
+    upcoming: string;
+    last_signup_at: Date | null;
+  }>(
+    `select v.phone, v.name, v.trusted, v.paused_at,
+            count(s.id) as signups,
+            count(s.id) filter (where s.outcome = 'no_show') as no_shows,
+            count(s.id) filter (where s.cancelled_at is null and t.due_by > $1) as upcoming,
+            max(s.created_at) as last_signup_at
+       from volunteers v
+       left join signups s on s.volunteer_phone = v.phone
+       left join tasks t on t.id = s.task_id and t.deleted_at is null
+      group by v.phone, v.name, v.trusted, v.paused_at
+      order by (v.paused_at is null), max(s.created_at) desc nulls last, v.name`,
+    [now],
+  );
+
+  return rows.map((row) => ({
+    phone: row.phone,
+    name: row.name,
+    trusted: row.trusted,
+    pausedAt: row.paused_at,
+    signups: Number(row.signups),
+    noShows: Number(row.no_shows),
+    upcoming: Number(row.upcoming),
+    lastSignupAt: row.last_signup_at,
+  }));
+}

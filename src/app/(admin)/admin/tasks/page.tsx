@@ -1,7 +1,7 @@
 import { listDeletedTasks, listTasksForAdmin, undoWindowMinutes } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
-import { signOutAction } from "../actions";
+import { AdminNav } from "@/components/AdminNav";
 import { requireAdminSession } from "../session";
 import { restoreTaskAction } from "./[id]/actions";
 
@@ -41,17 +41,7 @@ export default async function AdminTaskList({
 
   return (
     <>
-      <div className="topbar">
-        <span className="wordmark">Khair admin</span>
-        <a className="linkish" href="/admin/data">
-          Data
-        </a>
-        <form action={signOutAction}>
-          <button type="submit" className="linkish">
-            Sign out
-          </button>
-        </form>
-      </div>
+      <AdminNav current="tasks" />
 
       <div className="masthead">
         <h1>Tasks</h1>

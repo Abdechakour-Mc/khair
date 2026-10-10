@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { signInAction } from "./actions";
+import { AdminDashboard } from "./dashboard";
 import { hasAdminSession } from "./session";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,9 @@ export default async function AdminSignIn({
 }: {
   searchParams: Promise<{ problem?: string }>;
 }) {
-  if (await hasAdminSession()) redirect("/admin/tasks");
+  // Signed in, this is home: the Admin lands on where things stand rather
+  // than on a bare list of everything ever published.
+  if (await hasAdminSession()) return <AdminDashboard />;
 
   const { problem } = await searchParams;
   const message = problem ? PROBLEMS[problem] : undefined;

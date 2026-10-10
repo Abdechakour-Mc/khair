@@ -13,3 +13,7 @@ Thumbs.db
 
 # Screenshots taken while checking the UI, never committed.
 .shots/
+
+# A containerised chromium once wrote its profile here as a literal
+# Windows-looking directory. Never ours.
+C:/

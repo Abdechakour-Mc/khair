@@ -45,7 +45,7 @@ export default async function VolunteerRecord({
   return (
     <>
       <p className="backlink">
-        <a href="/admin/tasks">All tasks</a>
+        <a href="/admin/volunteers">All people</a>
       </p>
 
       <div className="masthead">
