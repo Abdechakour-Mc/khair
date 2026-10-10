@@ -5,6 +5,7 @@ import { getTaskWithSlots } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
 import { requireAdminSession } from "../../session";
+import { setTaskClosedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,29 @@ export default async function AdminTaskDetail({ params }: { params: Promise<{ id
           </dd>
         </div>
       </dl>
+
+      <div className="admin-controls">
+        <a className="action action-quiet" href={`/admin/tasks/${task.id}/edit`}>
+          Edit this task
+        </a>
+        <form action={setTaskClosedAction}>
+          <input type="hidden" name="id" value={task.id} />
+          <input type="hidden" name="closed" value={task.closed ? "false" : "true"} />
+          <button type="submit" className="action action-quiet">
+            {task.closed ? "Put it back on the list" : "Call this task off"}
+          </button>
+        </form>
+      </div>
+
+      {task.closed ? (
+        <div className="empty">
+          <p>
+            This task is off the public list and cannot be claimed. Anyone who had already
+            claimed a spot is still listed below, and still expects to come: tell them
+            yourself using the numbers here.
+          </p>
+        </div>
+      ) : null}
 
       <h2 className="day-heading">Who is coming</h2>
       {live.length === 0 ? (

@@ -1,23 +1,47 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  publishTaskAction,
-  type PublishState,
-} from "@/app/(admin)/admin/tasks/new/actions";
+import type {
+  TaskFormState,
+  TaskFormValues,
+} from "@/app/(admin)/admin/tasks/form-state";
 
-export function AdminTaskForm({ timeZoneLabel }: { timeZoneLabel: string }) {
-  const [state, formAction, pending] = useActionState<PublishState, FormData>(
-    publishTaskAction,
-    {},
-  );
+/**
+ * Publishing a Task and editing one are the same fields, so they are the same
+ * form. The server action comes in as a prop, which is how a Client Component
+ * is allowed to hold one.
+ */
+export function AdminTaskForm({
+  action,
+  initial,
+  hiddenFields,
+  submitLabel,
+  pendingLabel,
+  timeZoneLabel,
+}: {
+  action: (state: TaskFormState, formData: FormData) => Promise<TaskFormState>;
+  initial?: TaskFormValues;
+  /** Carried in the form rather than an action closure, so the action stays a
+      plain reference a Client Component is allowed to hold. */
+  hiddenFields?: Record<string, string>;
+  submitLabel: string;
+  pendingLabel: string;
+  timeZoneLabel: string;
+}) {
+  const [state, formAction, pending] = useActionState<TaskFormState, FormData>(action, {});
 
-  const v = state.values;
+  // What came back from a rejected submit wins over what the page loaded with,
+  // so a correction never silently discards the rest of the Admin's typing.
+  const v = state.values ?? initial;
   const problemFor = (field: string) => (state.field === field ? state.problem : undefined);
   const formProblem = state.problem && !state.field ? state.problem : undefined;
 
   return (
     <form action={formAction} className="signup-form">
+      {Object.entries(hiddenFields ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+
       <div className="field">
         <label htmlFor="title">What needs doing</label>
         <input
@@ -65,7 +89,8 @@ export function AdminTaskForm({ timeZoneLabel }: { timeZoneLabel: string }) {
           aria-invalid={problemFor("startsAt") ? true : undefined}
         />
         <p className="hint">
-          Leave this empty if it can be done any time before the deadline. Times are {timeZoneLabel}.
+          Leave this empty if it can be done any time before the deadline. Times are{" "}
+          {timeZoneLabel}.
         </p>
         {problemFor("startsAt") ? <p className="problem">{problemFor("startsAt")}</p> : null}
       </div>
@@ -97,7 +122,9 @@ export function AdminTaskForm({ timeZoneLabel }: { timeZoneLabel: string }) {
           defaultValue={v?.slotsNeeded ?? "1"}
           aria-invalid={problemFor("slotsNeeded") ? true : undefined}
         />
-        {problemFor("slotsNeeded") ? <p className="problem">{problemFor("slotsNeeded")}</p> : null}
+        {problemFor("slotsNeeded") ? (
+          <p className="problem">{problemFor("slotsNeeded")}</p>
+        ) : null}
       </div>
 
       {formProblem ? (
@@ -107,7 +134,7 @@ export function AdminTaskForm({ timeZoneLabel }: { timeZoneLabel: string }) {
       ) : null}
 
       <button type="submit" className="action" disabled={pending}>
-        {pending ? "Publishing" : "Publish task"}
+        {pending ? pendingLabel : submitLabel}
       </button>
     </form>
   );

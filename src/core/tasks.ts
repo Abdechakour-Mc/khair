@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { ValidationError, type ValidationCode } from "./errors";
+import { db, inTransaction } from "./db";
+import { ConflictError, ValidationError, type ValidationCode } from "./errors";
 
 export type Task = {
   id: string;
@@ -222,4 +222,96 @@ export async function listTasksForAdmin(now: Date = new Date()): Promise<OpenTas
       isFlexible: task.startsAt === null,
     };
   });
+}
+
+/**
+ * Corrects a published Task. A mistyped time should not mean deleting the
+ * Task and re-advertising it, which would lose everyone who had signed up.
+ *
+ * The Task is locked while the Slot count is checked, so the count cannot be
+ * cut below the number of people already holding a Slot.
+ */
+export async function editTask(id: string, input: PublishTaskInput): Promise<Task> {
+  const title = (input.title ?? "").trim();
+  if (!title) throw new ValidationError("title", "title_required", "Give the task a title.");
+
+  const dueBy = requireValidDate(input.dueBy, "dueBy", "deadline_required", "A deadline");
+
+  let startsAt: Date | null = null;
+  if (input.startsAt !== undefined && input.startsAt !== null) {
+    startsAt = requireValidDate(input.startsAt, "startsAt", "start_invalid", "The start time");
+    if (startsAt.getTime() > dueBy.getTime()) {
+      throw new ValidationError(
+        "startsAt",
+        "start_after_deadline",
+        "The start time is after the deadline.",
+      );
+    }
+  }
+
+  const slotsNeeded = input.slotsNeeded ?? 1;
+  if (!Number.isInteger(slotsNeeded) || slotsNeeded < 1) {
+    throw new ValidationError("slotsNeeded", "slots_too_few", "At least one helper is needed.");
+  }
+
+  return inTransaction(async (client) => {
+    const { rows: locked } = await client.query<{ id: string }>(
+      "select id from tasks where id = $1 for update",
+      [id],
+    );
+    if (!locked[0]) throw new ConflictError("task_missing", "That task is no longer listed.");
+
+    const { rows: counted } = await client.query<{ taken: string }>(
+      "select count(*) as taken from signups where task_id = $1 and cancelled_at is null",
+      [id],
+    );
+    const taken = Number(counted[0]?.taken ?? 0);
+    if (slotsNeeded < taken) {
+      throw new ValidationError(
+        "slotsNeeded",
+        "slots_below_claimed",
+        `${taken} people already hold a spot.`,
+      );
+    }
+
+    const { rows } = await client.query<TaskRow>(
+      `update tasks
+          set title = $2, description = $3, location = $4,
+              starts_at = $5, due_by = $6, slots_needed = $7
+        where id = $1
+        returning *`,
+      [
+        id,
+        title,
+        (input.description ?? "").trim(),
+        (input.location ?? "").trim(),
+        startsAt,
+        dueBy,
+        slotsNeeded,
+      ],
+    );
+
+    const row = rows[0];
+    if (!row) throw new Error("editTask updated no row");
+    return toTask(row);
+  });
+}
+
+/**
+ * Withdraws work that is no longer happening, or puts it back. Existing
+ * Signups are preserved: telling those Volunteers is a message the Admin
+ * sends by hand, using the tappable numbers on the Task's Admin page.
+ */
+export async function setTaskClosed(id: string, closed: boolean): Promise<Task> {
+  if (!/^[0-9a-f-]{36}$/i.test(id ?? "")) {
+    throw new ConflictError("task_missing", "That task is no longer listed.");
+  }
+
+  const { rows } = await db().query<TaskRow>(
+    "update tasks set closed = $2 where id = $1 returning *",
+    [id, closed],
+  );
+  const row = rows[0];
+  if (!row) throw new ConflictError("task_missing", "That task is no longer listed.");
+  return toTask(row);
 }

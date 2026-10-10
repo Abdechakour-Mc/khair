@@ -486,3 +486,18 @@ body {
   line-height: 1.25;
   color: var(--muted);
 }
+
+.admin-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: 24px;
+}
+
+.admin-controls > * {
+  flex: 1 1 auto;
+}
+
+.admin-controls .action-quiet {
+  width: 100%;
+}
