@@ -1,5 +1,5 @@
-/* Khair's public pages. Day-grouped agenda layout, chosen from three
-   prototyped candidates (see prototypes/task-list-variations.html).
+/* Khair's pages. Day-grouped agenda layout, chosen from three prototyped
+   candidates (see prototypes/task-list-variations.html).
 
    Every box rule uses logical properties, so the Arabic view mirrors without
    a single direction-specific override.
@@ -8,47 +8,134 @@
    green, and on a page where a stranger types their phone number, meeting
    an expectation beats being interesting. The dark accent is deliberately
    much lighter than the light one: the same hue fails contrast on a dark
-   ground. */
+   ground.
+
+   The second pass softened the surfaces and widened the rhythm without
+   touching that identity: a volunteer list is a page somebody reads while
+   standing up, holding a phone, deciding whether to say yes. Soft cards and
+   air make that easier to scan; sharp 2px corners and tight 1px rules made
+   it read like a form to be filled rather than an offer to be taken.
+
+   Three rules hold the whole thing together:
+
+   1. SHAPE. Chips are pills. Buttons, inputs, cards and panels share one
+      soft scale (10 / 14 / 18px). Nothing is square, nothing else is a pill.
+   2. COLOUR. One accent, green, used identically on every page. Everything
+      else is a semantic state: amber means "needed now", red means "this
+      went wrong or this destroys something", grey means "nothing left to
+      do here". Green never means an error, which is what it used to mean on
+      the signup form.
+   3. MOTION. Colour and 1px of travel, 150ms, and nothing else. Every flow
+      here works with scripting switched off, so nothing may depend on
+      JavaScript to look finished. */
 
 :root {
-  --ground: #f1f4f0;
+  /* ---- Surfaces ---------------------------------------------------- */
+  --ground: #f3f6f2;
   --surface: #ffffff;
-  --ink: #1a1f1b;
-  --muted: #5f6b62;
-  --line: #dbe3dc;
+  /* Inputs sit on white cards, so they need to read as a well rather than
+     as another card. */
+  --surface-sunken: #eff3ee;
+  --ink: #16201a;
+  --ink-soft: #3d4942;
+  --muted: #59665d;
+  --line: #dde5de;
+  --line-strong: #c6d2c8;
+
+  /* ---- The one accent ---------------------------------------------- */
   --accent: #1f6b45;
+  --accent-strong: #175436;
   --accent-ink: #ffffff;
-  --accent-soft: #e3efe8;
-  --covered-ink: #67716a;
-  --covered-bg: #e5eae6;
-  /* Urgent work. A warm hue against a page that is otherwise entirely green,
-     so the pin reads at a glance without a second green pill competing with
-     the spot count. Both pairs clear 4.5:1 on their own ground. */
-  --urgent-ink: #8a2b12;
-  --urgent-bg: #fbe6de;
+  --accent-soft: #e4efe8;
+  --accent-line: #bbd7c6;
+
+  /* ---- Nothing left to do here ------------------------------------- */
+  --covered-ink: #59655e;
+  --covered-bg: #e7ece8;
+
+  /* ---- Needed now -------------------------------------------------- */
+  /* Amber rather than the rust it used to be: urgent is a good thing to
+     notice, and it must never be mistaken for an error. */
+  --urgent-ink: #8a4a06;
+  --urgent-bg: #fdefd6;
+  --urgent-line: #efcf95;
+
+  /* ---- This went wrong, or this destroys something ------------------ */
+  --danger-ink: #a3261f;
+  --danger-bg: #fbe5e3;
+  --danger-line: #f0c4c0;
+
   --focus: #1f6b45;
 
-  --radius: 2px;
+  /* ---- Type -------------------------------------------------------- */
+  --display: var(--font-display), var(--font-body), system-ui, sans-serif;
+  /* The headline scales with the viewport, so a 320px phone is not handed
+     a 36px heading that wraps four times. */
+  --text-display: clamp(27px, 7.4vw, 36px);
+  --text-title: 18px;
+  --text-body: 15.5px;
+  --text-meta: 14px;
+  --text-hint: 13px;
+
+  /* ---- Space ------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --space-7: 36px;
+  --space-8: 48px;
+
+  /* ---- Shape ------------------------------------------------------- */
+  --radius-field: 10px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
+  --radius-pill: 999px;
+
   --tap: 48px;
+
+  /* ---- Depth ------------------------------------------------------- */
+  /* Tinted to the page's own hue. A pure-black shadow on a green-grey
+     ground reads as dirt. */
+  --shadow-card: 0 1px 2px rgba(22, 32, 26, 0.04), 0 2px 6px rgba(22, 32, 26, 0.05);
+  --shadow-lift: 0 2px 4px rgba(22, 32, 26, 0.05), 0 10px 22px rgba(22, 32, 26, 0.08);
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground: #121713;
-    --surface: #1a211c;
-    --ink: #e8eee9;
-    --muted: #96a39a;
-    --line: #28322b;
+    --ground: #111613;
+    --surface: #1b231d;
+    --surface-sunken: #151b17;
+    --ink: #e9efe9;
+    --ink-soft: #c2cdc5;
+    --muted: #93a199;
+    --line: #27312a;
+    --line-strong: #37443b;
+
     --accent: #6fbf92;
-    --accent-ink: #0d1710;
-    --accent-soft: #1d2f24;
-    --covered-ink: #86918a;
+    --accent-strong: #8ad0a8;
+    --accent-ink: #0c1710;
+    --accent-soft: #1c2d23;
+    --accent-line: #2d4636;
+
+    --covered-ink: #8a948c;
     --covered-bg: #222a24;
-    --urgent-ink: #ffb79e;
-    --urgent-bg: #3b2018;
-    --focus: #6fbf92;
+
+    --urgent-ink: #ffc879;
+    --urgent-bg: #3a2a12;
+    --urgent-line: #55401d;
+
+    --danger-ink: #ffaba5;
+    --danger-bg: #3b1b19;
+    --danger-line: #562825;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.28);
+    --shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.45), 0 12px 26px rgba(0, 0, 0, 0.36);
   }
 }
 
@@ -68,39 +155,54 @@ body {
   background: var(--ground);
   color: var(--ink);
   font-family: var(--font-body), "Segoe UI", system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: var(--text-body);
+  line-height: 1.55;
   -webkit-text-size-adjust: 100%;
 }
 
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .shell {
-  max-width: 560px;
+  max-width: 600px;
   margin-inline: auto;
-  padding-inline: 16px;
-  padding-block: 0 56px;
+  padding-inline: var(--space-4);
+  padding-block: 0 var(--space-8);
+}
+
+@media (min-width: 480px) {
+  .shell {
+    padding-inline: var(--space-5);
+  }
 }
 
 /* ---- Header and language switcher --------------------------------- */
 
+/* Sticky, because the language switcher is the one control somebody might
+   want halfway down a list they cannot read. Solid rather than blurred: a
+   backdrop filter on a scrolling page costs frames on exactly the phones
+   this app is for. */
 .topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-block: 12px;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  background: var(--ground);
   border-block-end: 1px solid var(--line);
 }
 
 .wordmark {
-  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-family: var(--display);
   font-size: 17px;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.005em;
   color: var(--ink);
   text-decoration: none;
 }
@@ -117,12 +219,18 @@ body {
   justify-content: center;
   min-height: 40px;
   min-width: 44px;
-  padding-inline: 10px;
-  border-radius: var(--radius);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-pill);
   color: var(--muted);
-  font-size: 15px;
+  font-size: var(--text-body);
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
+}
+
+.langs a:hover {
+  color: var(--ink);
+  background: var(--surface);
 }
 
 .langs a[aria-current="page"] {
@@ -133,244 +241,320 @@ body {
 /* ---- Page heading -------------------------------------------------- */
 
 .masthead {
-  padding-block: 28px 8px;
+  padding-block: var(--space-7) var(--space-2);
 }
 
 .masthead h1 {
-  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
-  font-size: 30px;
+  font-family: var(--display);
+  font-size: var(--text-display);
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin: 0 0 8px;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-3);
   text-wrap: balance;
 }
 
 .masthead p {
   margin: 0;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 16px;
+  line-height: 1.55;
   max-width: 46ch;
+}
+
+/* The way back for somebody who closed the tab. Sits with the heading it
+   belongs to, and stays quiet: it is the exception, not the task. */
+.masthead + .backlink {
+  padding-block: var(--space-3) 0;
+}
+
+.masthead + .backlink a:not(.action) {
+  min-height: 32px;
+  font-size: var(--text-meta);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The confirmation page's heading. The single success moment in the app, so
+   it gets one accent mark: without it the page that says "you are on the
+   list" opens exactly like the page that says "this link matches nothing". */
+.masthead-confirmed::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-block-end: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
 }
 
 /* ---- Agenda -------------------------------------------------------- */
 
+/* The day a group of work happens on. Structural rather than decorative:
+   it is the one thing that tells somebody whether they are free. */
 .day-heading {
-  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
-  font-size: 13px;
+  font-family: var(--display);
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
   margin: 0;
-  padding-block: 26px 10px;
-  border-block-end: 2px solid var(--accent);
+  padding-block: var(--space-6) var(--space-4);
 }
 
+/* A hairline between one day and the next, so the groups read as groups
+   without the heading having to shout. Not above the first one: a rule at
+   the very top of the list separates nothing. */
+section + section .day-heading,
+.day-heading + .slot ~ .day-heading {
+  margin-block-start: var(--space-4);
+  border-block-start: 1px solid var(--line);
+}
+
+.day-heading time {
+  letter-spacing: inherit;
+}
+
+/* A card per piece of work, because a volunteer reads one offer at a time
+   and decides about it. The 1px-separated rows this replaced read as a
+   table, which is the wrong invitation. */
 .slot {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px 14px;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
   align-items: center;
-  padding-block: 16px;
-  border-block-end: 1px solid var(--line);
+  margin-block-end: var(--space-3);
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 150ms var(--ease), border-color 150ms var(--ease);
+}
+
+@media (min-width: 420px) {
+  .slot {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+/* Only work that can still be taken lifts: a full task is not an invitation
+   to hover over it. */
+.slot:has(.action[href]):hover {
+  border-color: var(--accent-line);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Needed now. Marked structurally as well as with a chip, so the reason it
+   is at the top of the page survives being read quickly. */
+.slot-urgent {
+  border-color: var(--urgent-line);
+  border-inline-start: 3px solid var(--urgent-ink);
 }
 
 .slot-head {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 10px;
-  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
 }
 
 .slot h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.25;
+  font-family: var(--display);
+  font-size: var(--text-title);
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.slot h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.slot h2 a:hover {
+  text-decoration: underline;
 }
 
 .slot .detail {
-  margin: 4px 0 0;
-  font-size: 14px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-body);
   color: var(--muted);
 }
 
 .slot .when {
   color: var(--ink);
-  font-weight: 500;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 
 .slot .note {
-  margin: 6px 0 0;
-  font-size: 14px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-meta);
+  line-height: 1.5;
   color: var(--muted);
 }
 
+/* ---- Status chips --------------------------------------------------- */
+
+/* Quiet by default, and deliberately not green.
+   A card used to carry a green chip and a green button, and the two competed:
+   the eye cannot tell which green is the thing to press. Availability is
+   information, the button is the action, and only the action is the accent. */
 .spots {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-hint);
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 4px 10px;
-  border-radius: 999px;
+  color: var(--ink-soft);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-pill);
   white-space: nowrap;
 }
 
 .spots.covered {
   color: var(--covered-ink);
   background: var(--covered-bg);
-}
-
-/* Destructive controls read as links rather than buttons, so they never
-   compete with the one action a page is actually for. Coloured, not shouted:
-   the warning is in the words and the page they lead to. */
-.linkish-destructive {
-  color: var(--urgent-ink);
-}
-
-/* Everything that can destroy something sits in one quiet group, below the
-   ordinary controls. */
-.admin-controls-quiet {
-  margin-block-start: 28px;
-  padding-block-start: 16px;
-  border-block-start: 1px solid var(--line);
-  display: block;
-}
-
-.admin-controls-quiet .hint {
-  margin-block-start: 6px;
-}
-
-/* The undo, where the Admin lands after deleting something. */
-.undo-band {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.undo-band p {
-  margin: 0;
+  border-color: transparent;
 }
 
 .spots.urgent {
   color: var(--urgent-ink);
   background: var(--urgent-bg);
+  border-color: var(--urgent-line);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* The same mark on the task's own page, where there is no row of pills to
-   sit in. */
-.urgent-note {
-  margin: 0 0 8px;
-  color: var(--urgent-ink);
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* A checkbox reads as one line, not as a label above a field. */
-.field-check label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: var(--tap);
-  font-weight: 500;
-}
-
-.field-check input {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--accent);
+  letter-spacing: 0.05em;
 }
 
 /* Who the work is for. Outlined rather than filled: it sits beside the spot
    count and must not out-shout it, since the count is what most people on
    most tasks are reading. */
 .spots.audience {
-  color: var(--ink);
   background: transparent;
-  border: 1px solid var(--line);
-  font-weight: 500;
+  border-color: var(--line-strong);
+  font-weight: 550;
 }
+
+/* ---- Buttons -------------------------------------------------------- */
 
 .action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: var(--tap);
-  padding-inline: 18px;
-  border: 0;
-  border-radius: var(--radius);
+  padding-inline: var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-field);
   background: var(--accent);
   color: var(--accent-ink);
   font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: 650;
   text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
+  transition: background-color 150ms var(--ease), transform 150ms var(--ease),
+    box-shadow 150ms var(--ease);
+}
+
+.action:hover {
+  background: var(--accent-strong);
 }
 
 .action:active {
   transform: translateY(1px);
 }
 
+/* A task with nothing left to take. Not a dead grey button, which invites a
+   tap that cannot go anywhere: it reads as a label. */
 .action[aria-disabled="true"] {
-  background: var(--covered-bg);
+  background: transparent;
+  border-color: transparent;
   color: var(--covered-ink);
+  font-weight: 600;
+  padding-inline: 0;
   cursor: default;
   pointer-events: none;
   transform: none;
 }
 
-/* ---- Empty state --------------------------------------------------- */
-
-.empty {
-  margin-block-start: 28px;
-  padding: 24px 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+/* Releasing is the right thing to do when plans change, so the control is
+   plainly available. It is quiet rather than alarming: no red, no warning
+   iconography, nothing that makes withdrawing feel like a confession. */
+.action-quiet {
+  width: 100%;
+  min-height: 52px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-line);
 }
 
-.empty h2 {
-  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
-  margin: 0 0 6px;
-  font-size: 19px;
-  font-weight: 600;
+.action-quiet:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
-.empty p {
-  margin: 0;
+/* Reserved for the handful of actions that really do destroy data. Red
+   because this is the one page where the accent would be a lie: "Run the
+   purge now" in the same friendly green as "Sign up" tells somebody that
+   deleting six months of records is the pleasant thing to do. */
+.action-danger {
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  border-color: var(--danger-line);
+}
+
+.action-danger:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-ink);
+}
+
+/* A form submit that reads as a link: signing out is not a primary action. */
+.linkish {
+  min-height: 40px;
+  padding: 0 var(--space-1);
+  background: none;
+  border: 0;
   color: var(--muted);
-  font-size: 15px;
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 150ms var(--ease);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
-  .action:active {
-    transform: none;
-  }
+.linkish:hover {
+  color: var(--ink);
 }
 
-/* ---- Task detail, signup form, confirmation ------------------------ */
+/* Destructive controls read as links rather than buttons, so they never
+   compete with the one action a page is actually for. Coloured, not shouted:
+   the warning is in the words and the page they lead to. */
+.linkish-destructive {
+  color: var(--danger-ink);
+}
+
+.linkish-destructive:hover {
+  color: var(--danger-ink);
+}
 
 .backlink {
   margin: 0;
-  padding-block: 16px 0;
-  font-size: 15px;
+  padding-block: var(--space-4) 0;
+  font-size: var(--text-body);
 }
 
-.backlink a {
+/* `:not(.action)` matters more than it looks. A plain `.backlink a` rule
+   outranks `.action` on specificity, so the Admin's "Publish a task" button
+   was being painted accent-on-accent: a green label on a green button, which
+   rendered as an empty green pill. */
+.backlink a:not(.action) {
   display: inline-flex;
   align-items: center;
   min-height: 40px;
@@ -379,23 +563,107 @@ body {
   text-decoration: none;
 }
 
-.backlink a:hover {
+.backlink a:not(.action):hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
+
+.backlink .action {
+  margin-block-start: var(--space-2);
+}
+
+/* ---- Panels: empty states, and the notices that share their shape --- */
+
+.empty {
+  margin-block-start: var(--space-6);
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+}
+
+.empty h2 {
+  font-family: var(--display);
+  margin: 0 0 var(--space-2);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.empty p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-body);
+}
+
+.empty p + p,
+.empty p + form,
+.empty form + p {
+  margin-block-start: var(--space-3);
+}
+
+.empty .action,
+.empty .action-quiet {
+  margin-block-start: var(--space-2);
+}
+
+/* Something went wrong, or something is about to be destroyed. Red, and
+   never the accent: a form that marked its errors in the same green as its
+   submit button was telling people their mistake had worked. */
+.is-problem {
+  background: var(--danger-bg);
+  border-color: var(--danger-line);
+}
+
+.is-problem p,
+.is-problem strong {
+  color: var(--danger-ink);
+}
+
+/* It worked. Said in the accent, which is the only thing the accent means. */
+.is-done {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.is-done p {
+  color: var(--accent-strong);
+}
+
+/* Serious but not yet done: the page that counts what an erasure will take. */
+.is-warning {
+  background: var(--urgent-bg);
+  border-color: var(--urgent-line);
+}
+
+.is-warning p,
+.is-warning strong {
+  color: var(--urgent-ink);
+}
+
+/* ---- Task detail ---------------------------------------------------- */
 
 .facts {
   display: grid;
   gap: 0;
-  margin: 20px 0 0;
+  margin: var(--space-5) 0 0;
+  padding: var(--space-2) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
 }
 
 .facts > div {
   display: grid;
-  grid-template-columns: 7.5em 1fr;
-  gap: 12px;
-  padding-block: 12px;
+  grid-template-columns: 6.5em 1fr;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
   border-block-end: 1px solid var(--line);
-  font-size: 15px;
+  font-size: var(--text-body);
+}
+
+.facts > div:last-child {
+  border-block-end: 0;
 }
 
 .facts dt {
@@ -405,134 +673,220 @@ body {
 
 .facts dd {
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
+  text-wrap: pretty;
 }
+
+/* The same mark as the chip, on the page where there is no row of chips for
+   it to sit in. */
+.urgent-note {
+  display: inline-block;
+  margin: 0 0 var(--space-3);
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--urgent-bg);
+  color: var(--urgent-ink);
+  font-size: var(--text-hint);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Forms ---------------------------------------------------------- */
 
 .signup-form {
   display: grid;
-  gap: 20px;
-  margin-block-start: 28px;
-  padding: 20px;
+  gap: var(--space-5);
+  margin-block-start: var(--space-6);
+  padding: var(--space-5);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-card);
 }
 
 .field {
   display: grid;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .field label {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: 650;
 }
 
-.field input {
+.field input,
+.field select,
+.field textarea {
   width: 100%;
   min-height: var(--tap);
-  padding-inline: 12px;
+  padding-inline: var(--space-3);
   font-family: inherit;
   /* 16px or larger, or iOS Safari zooms the page on focus. */
   font-size: 16px;
   color: var(--ink);
-  background: var(--ground);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  background: var(--surface-sunken);
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-field);
+  transition: border-color 150ms var(--ease), background-color 150ms var(--ease);
 }
 
-.field input::placeholder {
+.field textarea {
+  padding-block: var(--space-3);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.field select {
+  appearance: none;
+  padding-inline-end: var(--space-5);
+  background-image: linear-gradient(transparent, transparent);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
   color: var(--muted);
 }
 
 .field input[aria-invalid="true"] {
-  border-color: var(--accent);
+  border-color: var(--danger-ink);
   border-width: 2px;
 }
 
 .hint {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--text-hint);
+  line-height: 1.5;
   color: var(--muted);
 }
 
 .problem {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent);
+  font-size: var(--text-meta);
+  font-weight: 650;
+  color: var(--danger-ink);
 }
 
 .problem-block {
-  padding: 12px 14px;
-  background: var(--accent-soft);
-  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius-field);
 }
 
 .signup-form .action {
   width: 100%;
   font-size: 17px;
   min-height: 56px;
+  box-shadow: var(--shadow-card);
 }
 
 .signup-form .action:disabled {
   background: var(--covered-bg);
+  border-color: var(--covered-bg);
   color: var(--covered-ink);
+  box-shadow: none;
   cursor: default;
 }
 
-/* ---- Releasing a Slot ---------------------------------------------- */
+/* A form inside a panel belongs to the panel. Without this it renders as a
+   card inside a card, with two borders and two shadows a few pixels apart. */
+.empty .signup-form {
+  margin-block-start: var(--space-4);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* A checkbox reads as one line, not as a label above a field. */
+.field-check label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap);
+  font-weight: 600;
+}
+
+.field-check input {
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  accent-color: var(--accent);
+}
+
+/* ---- The way out of a Slot, and the way to close it off ------------- */
 
 .release-form {
-  margin-block-start: 20px;
+  margin-block-start: var(--space-5);
 }
 
-/* Releasing is the right thing to do when plans change, so the control is
-   plainly available. It is quiet rather than alarming: no red, no warning
-   iconography, nothing that makes withdrawing feel like a confession. */
-.action-quiet {
-  width: 100%;
-  min-height: 52px;
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
+.done-block {
+  margin-block-start: var(--space-5);
 }
 
-/* ---- Admin view ---------------------------------------------------- */
-
-.shell-admin {
-  max-width: 640px;
+.done-block .hint {
+  margin-block-start: var(--space-2);
 }
 
-.field textarea {
-  width: 100%;
-  padding: 12px;
-  font-family: inherit;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--ink);
-  background: var(--ground);
+/* ---- Calendar links ------------------------------------------------- */
+
+/* Quiet: a reminder is useful, and it is not what the page is for. */
+.calendar-links {
+  margin-block-start: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  resize: vertical;
+  border-radius: var(--radius-card);
 }
 
-/* A form submit that reads as a link: sign out is not a primary action. */
-.linkish {
-  min-height: 40px;
-  padding: 0 4px;
-  background: none;
-  border: 0;
-  color: var(--muted);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
+.calendar-links .hint {
+  margin-block-end: var(--space-1);
 }
 
-.linkish:hover {
+.calendar-links .backlink {
+  padding-block: 0;
+}
+
+/* ---- The short code, on the page they were told to save ------------- */
+
+.code-block {
+  margin-block-start: var(--space-5);
+  padding: var(--space-5);
+  border: 1px dashed var(--accent-line);
+  border-radius: var(--radius-panel);
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.code-label {
+  margin: 0;
+  font-size: var(--text-hint);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+
+.code-value {
+  margin: var(--space-2) 0 0;
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
+}
+
+.code-block .hint {
+  margin-block-start: var(--space-3);
 }
 
 /* ---- Mosque identity beside the wordmark --------------------------- */
@@ -540,7 +894,7 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
   min-height: 44px;
   text-decoration: none;
   color: inherit;
@@ -554,8 +908,8 @@ body {
   height: 36px;
   object-fit: contain;
   background: #ffffff;
-  border-radius: 3px;
-  padding: 2px;
+  border-radius: var(--radius-field);
+  padding: 3px;
 }
 
 .brand-text {
@@ -564,44 +918,15 @@ body {
 }
 
 .brand-org {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 12.5px;
+  font-weight: 550;
   line-height: 1.25;
   color: var(--muted);
 }
 
-.admin-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-block-start: 24px;
-}
+/* ---- The motto band at the foot of the public pages ----------------- */
 
-.admin-controls > * {
-  flex: 1 1 auto;
-}
-
-.admin-controls .action-quiet {
-  width: 100%;
-}
-
-/* A row that carries an action under the name rather than beside it, so the
-   outcome control never squeezes a long name on a phone. */
-.slot-stacked {
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.outcome-form {
-  margin: 0;
-}
-
-.outcome-form .linkish {
-  padding: 0;
-  text-align: start;
-}
-
-/* The motto band: three texts taking turns at the foot of the public pages.
+/* Three texts taking turns.
 
    All three occupy one grid cell, so the band is as tall as the tallest of
    them and never resizes or nudges the list as they change. The first is
@@ -614,9 +939,11 @@ body {
 .motto {
   display: grid;
   grid-template-areas: "motto";
-  margin-block-start: 40px;
-  padding-block: 24px;
-  border-block-start: 1px solid var(--line);
+  margin-block-start: var(--space-8);
+  padding: var(--space-6) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
   text-align: center;
 }
 
@@ -634,25 +961,25 @@ body {
 
 .motto-arabic {
   margin: 0;
-  font-size: 19px;
-  line-height: 1.8;
+  font-size: 20px;
+  line-height: 1.85;
   color: var(--ink);
 }
 
 .motto-said {
-  margin: 6px 0 0;
-  font-size: 14px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-meta);
   line-height: 1.5;
   color: var(--muted);
 }
 
 .motto-source {
   display: block;
-  margin-block-start: 6px;
+  margin-block-start: var(--space-2);
   font-size: 12px;
   font-style: normal;
+  letter-spacing: 0.02em;
   color: var(--muted);
-  opacity: 0.8;
 }
 
 @keyframes motto-turn {
@@ -680,57 +1007,92 @@ body {
   animation-play-state: paused;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .motto-item {
-    animation: none;
+/* ---- Admin view ----------------------------------------------------- */
+
+.shell-admin {
+  max-width: 680px;
+}
+
+.admin-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-start: var(--space-6);
+}
+
+.admin-controls > * {
+  flex: 1 1 auto;
+}
+
+.admin-controls .action-quiet {
+  width: 100%;
+}
+
+/* Everything that can destroy something sits in one quiet group, below the
+   ordinary controls. */
+.admin-controls-quiet {
+  display: block;
+  margin-block-start: var(--space-7);
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--line);
+}
+
+.admin-controls-quiet .hint {
+  margin-block-start: var(--space-2);
+}
+
+/* A row that carries an action under the name rather than beside it, so the
+   outcome control never squeezes a long name on a phone. */
+.slot-stacked {
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+@media (min-width: 420px) {
+  .slot-stacked {
+    grid-template-columns: 1fr;
   }
 }
 
-/* The calendar links. Quiet: a reminder is useful, and it is not what the
-   page is for. */
-.calendar-links {
-  margin-block-start: 20px;
-}
-
-.calendar-links .hint {
-  margin-block-end: 2px;
-}
-
-/* Saying the work is done: offered quietly, above the way out of the Slot. */
-.done-block {
-  margin-block-start: 20px;
-}
-
-.done-block .hint {
-  margin-block-start: 6px;
-}
-
-/* The short code, on the page they were told to save. Big and spaced, so it
-   can be read off a phone and written down without a mistake. */
-.code-block {
-  margin-block-start: 20px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  text-align: center;
-}
-
-.code-label {
+.outcome-form {
   margin: 0;
-  font-size: 13px;
-  color: var(--muted);
 }
 
-.code-value {
-  margin: 4px 0 0;
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
+.outcome-form .linkish {
+  padding: 0;
+  text-align: start;
 }
 
-.code-block .hint {
-  margin-block-start: 8px;
+/* The undo, where the Admin lands after deleting something. */
+.undo-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.undo-band p {
+  margin: 0;
+}
+
+.undo-band .action-quiet {
+  width: auto;
+  min-height: var(--tap);
+  margin-block-start: 0;
+}
+
+/* ---- Motion, only where it was asked for ---------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+  .action:active {
+    transform: none;
+  }
+  .motto-item {
+    animation: none;
+  }
 }

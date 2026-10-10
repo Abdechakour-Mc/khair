@@ -58,13 +58,13 @@ export default async function AdminData({
       </div>
 
       {problem ? (
-        <div className="empty" role="alert">
+        <div className="empty is-problem" role="alert">
           <p>{PROBLEM_LABEL[problem] ?? "That did not go through. Nothing was deleted."}</p>
         </div>
       ) : null}
 
       {done ? (
-        <div className="empty" role="status">
+        <div className="empty is-done" role="status">
           <p>
             {done === "purge" ? "Purge finished. " : "Demo data cleared. "}
             Deleted {signups ?? 0} signups and {volunteers ?? 0} volunteer records.
@@ -88,7 +88,7 @@ export default async function AdminData({
         </p>
         <p className="hint">This cannot be undone.</p>
         <form action={runPurgeAction}>
-          <button type="submit" className="action action-quiet">
+          <button type="submit" className="action action-quiet action-danger">
             Run the purge now
           </button>
         </form>
@@ -116,7 +116,7 @@ export default async function AdminData({
             <label htmlFor="phrase">Type the phrase</label>
             <input id="phrase" name="phrase" type="text" autoComplete="off" required />
           </div>
-          <button type="submit" className="action action-quiet">
+          <button type="submit" className="action action-quiet action-danger">
             Clear the demo data
           </button>
         </form>

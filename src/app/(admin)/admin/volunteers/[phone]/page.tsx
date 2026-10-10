@@ -65,7 +65,7 @@ export default async function VolunteerRecord({
       </p>
 
       {problem ? (
-        <div className="empty" role="alert">
+        <div className="empty is-problem" role="alert">
           <p>
             {problem === "signup_missing"
               ? "Nobody has signed up with that number, so there is nobody to mark yet."

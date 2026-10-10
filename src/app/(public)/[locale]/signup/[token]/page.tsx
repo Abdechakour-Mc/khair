@@ -61,7 +61,7 @@ export default async function SignupConfirmation({
 
   return (
     <>
-      <div className="masthead">
+      <div className={released ? "masthead" : "masthead masthead-confirmed"}>
         <h1>{released ? m.releasedTitle : m.confirmedTitle}</h1>
         {released ? <p>{m.releasedBody}</p> : task ? <p>{m.confirmedFor(task.title)}</p> : null}
       </div>

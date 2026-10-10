@@ -64,13 +64,13 @@ export default async function AdminTaskList({
       </div>
 
       {problem ? (
-        <div className="empty" role="alert">
+        <div className="empty is-problem" role="alert">
           <p>{PROBLEM_LABEL[problem] ?? "That did not go through. Nothing was changed."}</p>
         </div>
       ) : null}
 
       {done === "forget" ? (
-        <div className="empty" role="status">
+        <div className="empty is-done" role="status">
           <p>
             Forgotten. Deleted {signups ?? 0} signups and {volunteers ?? 0} volunteer records.
             Nothing here mentions them any more.
@@ -82,7 +82,7 @@ export default async function AdminTaskList({
           asked for beforehand: a dialog interrupts everyone to prevent a rare
           mistake, an undo rescues the mistake without stopping anybody. */}
       {recentlyDeleted.map((task) => (
-        <div className="empty undo-band" role="status" key={task.id}>
+        <div className="empty is-done undo-band" role="status" key={task.id}>
           <p>
             Deleted <strong>{task.id === deleted && title ? title : task.title}</strong> and its
             signups. You can still bring it back for {undoWindowMinutes()} minutes.
@@ -109,7 +109,7 @@ export default async function AdminTaskList({
         </div>
       ) : (
         upcoming.map((task) => (
-          <article className="slot" key={task.id}>
+          <article className={task.urgent ? "slot slot-urgent" : "slot"} key={task.id}>
             <div>
               <div className="slot-head">
                 <h2>

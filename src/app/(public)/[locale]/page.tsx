@@ -100,7 +100,7 @@ function Slot({
   const audience = openToLabel(task.openTo, m);
 
   return (
-    <article className="slot">
+    <article className={task.urgent ? "slot slot-urgent" : "slot"}>
       <div>
         <div className="slot-head">
           <h2>{task.title}</h2>
@@ -120,13 +120,11 @@ function Slot({
         </p>
         {task.description ? <p className="note">{task.description}</p> : null}
       </div>
-      {task.isFull ? (
-        // Still listed, so the page does not look broken and the community
-        // can see the work is covered. Just nothing left to claim.
-        <span className="action" aria-disabled="true">
-          {m.fullyCovered}
-        </span>
-      ) : (
+      {task.isFull ? null : (
+        // A full Task keeps its place in the list, so the page does not look
+        // broken and the community can see the work is covered. The chip
+        // beside the title already says so, and saying it twice on one card
+        // reads as a mistake rather than as emphasis.
         <a className="action" href={`/${locale}/task/${task.id}`}>
           {m.signUp}
         </a>

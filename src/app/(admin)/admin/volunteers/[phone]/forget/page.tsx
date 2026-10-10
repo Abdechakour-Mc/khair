@@ -43,12 +43,12 @@ export default async function ForgetVolunteer({
       </div>
 
       {problem ? (
-        <div className="empty" role="alert">
+        <div className="empty is-problem" role="alert">
           <p>That is not the same number, so nothing was deleted. Try again or go back.</p>
         </div>
       ) : null}
 
-      <div className="empty">
+      <div className="empty is-warning">
         <p>
           <strong>
             This will delete {counted.signups}{" "}
@@ -82,7 +82,7 @@ export default async function ForgetVolunteer({
           />
           <p className="hint">{display}</p>
         </div>
-        <button type="submit" className="action">
+        <button type="submit" className="action action-quiet action-danger">
           Forget this volunteer
         </button>
       </form>

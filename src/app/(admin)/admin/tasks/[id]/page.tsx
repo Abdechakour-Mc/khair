@@ -62,7 +62,7 @@ export default async function AdminTaskDetail({
       </div>
 
       {problem ? (
-        <div className="empty" role="status">
+        <div className="empty is-problem" role="status">
           <p>{PROBLEM_LABEL[problem] ?? "That did not go through. Nothing was changed."}</p>
         </div>
       ) : null}

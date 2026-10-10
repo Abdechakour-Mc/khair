@@ -10,3 +10,6 @@ next-env.d.ts
 
 .DS_Store
 Thumbs.db
+
+# Screenshots taken while checking the UI, never committed.
+.shots/
