@@ -1,7 +1,15 @@
-# The app runs in Linux containers while the working copy lives on Windows.
-# Normalise to LF in the repository so shell scripts and SQL behave the same
-# in both places.
-* text=auto eol=lf
-*.png binary
-*.jpg binary
-*.ico binary
+# Shell scripts must keep LF endings whatever the checkout machine prefers.
+# core.autocrlf is true on this Windows box, so without this a fresh clone
+# gets CRLF and bash refuses the script with "$'\r': command not found" -
+# which looks like a broken script rather than a line-ending problem.
+*.sh text eol=lf
+
+# The migrations are read by Postgres, and the seeds and scripts by tsx.
+# Same reasoning: one true line ending, decided here rather than by whoever
+# happens to clone the repo.
+*.sql text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf
