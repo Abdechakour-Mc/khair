@@ -685,3 +685,13 @@ body {
     animation: none;
   }
 }
+
+/* The calendar links. Quiet: a reminder is useful, and it is not what the
+   page is for. */
+.calendar-links {
+  margin-block-start: 20px;
+}
+
+.calendar-links .hint {
+  margin-block-end: 2px;
+}

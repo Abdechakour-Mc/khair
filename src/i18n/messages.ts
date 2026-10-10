@@ -28,6 +28,9 @@ export type Messages = {
   openToSisters: string;
   urgentHeading: string;
   urgentMark: string;
+  calendarLabel: string;
+  calendarGoogle: string;
+  calendarIcs: string;
   helpersNeeded: (count: number) => string;
 
   nameLabel: string;
@@ -82,6 +85,9 @@ const en: Messages = {
   openToSisters: "Sisters",
   urgentHeading: "Needed now",
   urgentMark: "Urgent",
+  calendarLabel: "Put it in your calendar",
+  calendarGoogle: "Google Calendar",
+  calendarIcs: "Apple or Outlook",
   helpersNeeded: (count) => (count === 1 ? "1 helper" : `${count} helpers`),
 
   nameLabel: "Your name",
@@ -163,6 +169,9 @@ const ar: Messages = {
   openToSisters: "للأخوات",
   urgentHeading: "مطلوب الآن",
   urgentMark: "عاجل",
+  calendarLabel: "أضفه إلى تقويمك",
+  calendarGoogle: "تقويم Google",
+  calendarIcs: "Apple أو Outlook",
   helpersNeeded: (count) => `${count}`,
 
   nameLabel: "اسمك",
@@ -244,6 +253,9 @@ const fr: Messages = {
   openToSisters: "Sœurs",
   urgentHeading: "À faire maintenant",
   urgentMark: "Urgent",
+  calendarLabel: "Ajoutez-le à votre agenda",
+  calendarGoogle: "Google Agenda",
+  calendarIcs: "Apple ou Outlook",
   helpersNeeded: (count) => (count === 1 ? "1 personne" : `${count} personnes`),
 
   nameLabel: "Votre nom",

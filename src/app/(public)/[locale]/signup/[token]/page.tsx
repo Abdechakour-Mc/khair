@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+import { CalendarLinks } from "@/components/CalendarLinks";
 import { mosqueIdentity } from "@/config/mosque";
 import { findSignupByCancelToken } from "@/core/signups";
 import { getTaskWithSlots, hasHappened } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
 import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
+import { siteOrigin } from "@/view/site";
 import { releaseSignupAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +48,7 @@ export default async function SignupConfirmation({
   const task = await getTaskWithSlots(signup.taskId);
   const happened = task !== null && hasHappened(task);
   const timeZone = appTimeZone();
+  const site = await siteOrigin();
   const when = task?.startsAt
     ? `${formatDayHeading(task.startsAt, locale, timeZone)}, ${formatTime(task.startsAt, locale, timeZone)}`
     : m.noFixedTime;
@@ -82,6 +85,23 @@ export default async function SignupConfirmation({
             <p>{m.confirmedKeepLink}</p>
             {mosque.name ? <p className="hint">{m.heldBy(mosque.name)}</p> : null}
           </div>
+
+          {/* The whole reminder system: the volunteer's own phone, which
+              costs no provider and no message fees. Not offered once the
+              work has happened, where it would only clutter the page. */}
+          {task && !happened ? (
+            <CalendarLinks
+              task={task}
+              locale={locale}
+              timeZone={timeZone}
+              site={site}
+              labels={{
+                calendarLabel: m.calendarLabel,
+                calendarGoogle: m.calendarGoogle,
+                calendarIcs: m.calendarIcs,
+              }}
+            />
+          ) : null}
 
           {happened ? (
             // Not offered once the work has happened. Releasing a Slot is a

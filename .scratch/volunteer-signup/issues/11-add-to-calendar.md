@@ -12,7 +12,7 @@ reminder prevents the no-show that a record merely documents.
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Decisions already taken, worth not re-litigating:**
 - Khair stores no duration, only a start. Default the event to one hour and
@@ -22,16 +22,16 @@ reminder prevents the no-show that a record merely documents.
 - Prefer a `.ics` route handler over a `data:` URI link, so the file has a
   real filename and content type.
 
-- [ ] A control on the confirmation page opens Google Calendar with the title,
+- [x] A control on the confirmation page opens Google Calendar with the title,
       time, location and a link back to the Task already filled in
-- [ ] The same control appears on the public Task page
-- [ ] A `.ics` download covers Apple Calendar and Outlook
-- [ ] A fixed Task produces a timed event; a flexible one produces an all-day
+- [x] The same control appears on the public Task page
+- [x] A `.ics` download covers Apple Calendar and Outlook
+- [x] A fixed Task produces a timed event; a flexible one produces an all-day
       event on its Deadline
-- [ ] Times are correct in the mosque's timezone, including across a
+- [x] Times are correct in the mosque's timezone, including across a
       daylight-saving change
-- [ ] The `.ics` escapes commas, semicolons and newlines in the title,
+- [x] The `.ics` escapes commas, semicolons and newlines in the title,
       description and location, and uses CRLF line endings
-- [ ] Labels are translated in all three languages
-- [ ] Covered at the core seam: the Google URL and the `.ics` body are built by
+- [x] Labels are translated in all three languages
+- [x] Covered at the core seam: the Google URL and the `.ics` body are built by
       pure functions and tested against a fixed Task and a flexible one

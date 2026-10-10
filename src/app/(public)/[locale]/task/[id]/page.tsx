@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
+import { CalendarLinks } from "@/components/CalendarLinks";
 import { SignupForm } from "@/components/SignupForm";
 import { getTaskWithSlots } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
 import { formatDayHeading, formatShortDate, formatTime, openToLabel } from "@/view/format";
+import { siteOrigin } from "@/view/site";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,7 @@ export default async function TaskDetail({
 
   const m = messages[locale];
   const timeZone = appTimeZone();
+  const site = await siteOrigin();
 
   const audience = openToLabel(task.openTo, m);
   const deadlinePassed = task.dueBy.getTime() <= Date.now();
@@ -81,6 +84,7 @@ export default async function TaskDetail({
           <p>{blocked.body}</p>
         </div>
       ) : (
+        <>
         <SignupForm
           taskId={task.id}
           locale={locale}
@@ -93,6 +97,21 @@ export default async function TaskDetail({
             problems: m.problems,
           }}
         />
+        {/* Offered before signing up as well as after: somebody deciding
+            whether they can make it is exactly who needs to see it in their
+            own week. */}
+        <CalendarLinks
+          task={task}
+          locale={locale}
+          timeZone={timeZone}
+          site={site}
+          labels={{
+            calendarLabel: m.calendarLabel,
+            calendarGoogle: m.calendarGoogle,
+            calendarIcs: m.calendarIcs,
+          }}
+        />
+        </>
       )}
     </>
   );
