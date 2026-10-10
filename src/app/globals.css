@@ -217,6 +217,16 @@ body {
   background: var(--covered-bg);
 }
 
+/* Who the work is for. Outlined rather than filled: it sits beside the spot
+   count and must not out-shout it, since the count is what most people on
+   most tasks are reading. */
+.spots.audience {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  font-weight: 500;
+}
+
 .action {
   display: inline-flex;
   align-items: center;

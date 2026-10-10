@@ -11,6 +11,7 @@ export type ValidationCode =
   | "start_after_deadline"
   | "slots_too_few"
   | "slots_below_claimed"
+  | "open_to_invalid"
   | "name_required"
   | "name_too_long"
   | "phone_required"

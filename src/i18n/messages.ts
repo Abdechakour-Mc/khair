@@ -23,6 +23,9 @@ export type Messages = {
   whereLabel: string;
   neededLabel: string;
   deadlineLabel: string;
+  openToLabel: string;
+  openToBrothers: string;
+  openToSisters: string;
   helpersNeeded: (count: number) => string;
 
   nameLabel: string;
@@ -72,6 +75,9 @@ const en: Messages = {
   whereLabel: "Where",
   neededLabel: "Needed",
   deadlineLabel: "Deadline",
+  openToLabel: "Who it is for",
+  openToBrothers: "Brothers",
+  openToSisters: "Sisters",
   helpersNeeded: (count) => (count === 1 ? "1 helper" : `${count} helpers`),
 
   nameLabel: "Your name",
@@ -110,6 +116,7 @@ const en: Messages = {
     start_after_deadline: "The start time is after the deadline.",
     slots_too_few: "At least one helper is needed.",
     slots_below_claimed: "More people have already claimed a spot than that.",
+    open_to_invalid: "Choose who the task is for.",
     name_required: "Enter your name.",
     name_too_long: "That name is too long.",
     phone_required: "Enter a phone number.",
@@ -145,6 +152,9 @@ const ar: Messages = {
   whereLabel: "المكان",
   neededLabel: "المطلوب",
   deadlineLabel: "الموعد النهائي",
+  openToLabel: "لمن هذا العمل",
+  openToBrothers: "للإخوة",
+  openToSisters: "للأخوات",
   helpersNeeded: (count) => `${count}`,
 
   nameLabel: "اسمك",
@@ -181,6 +191,7 @@ const ar: Messages = {
     start_after_deadline: "وقت البدء بعد الموعد النهائي.",
     slots_too_few: "يلزم شخص واحد على الأقل.",
     slots_below_claimed: "عدد المسجّلين أكبر من هذا العدد.",
+    open_to_invalid: "اختر لمن هذا العمل.",
     name_required: "أدخل اسمك.",
     name_too_long: "الاسم طويل جدًا.",
     phone_required: "أدخل رقم الهاتف.",
@@ -218,6 +229,9 @@ const fr: Messages = {
   whereLabel: "Où",
   neededLabel: "Besoin",
   deadlineLabel: "Échéance",
+  openToLabel: "Pour qui",
+  openToBrothers: "Frères",
+  openToSisters: "Sœurs",
   helpersNeeded: (count) => (count === 1 ? "1 personne" : `${count} personnes`),
 
   nameLabel: "Votre nom",
@@ -257,6 +271,7 @@ const fr: Messages = {
     start_after_deadline: "L'heure de début est après l'échéance.",
     slots_too_few: "Il faut au moins une personne.",
     slots_below_claimed: "Plus de personnes se sont déjà inscrites que ce nombre.",
+    open_to_invalid: "Choisissez pour qui est la tâche.",
     name_required: "Entrez votre nom.",
     name_too_long: "Ce nom est trop long.",
     phone_required: "Entrez un numéro de téléphone.",

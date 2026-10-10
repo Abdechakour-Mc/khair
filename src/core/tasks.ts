@@ -2,11 +2,26 @@ import { db, inTransaction } from "./db";
 import { ConflictError, ValidationError, type ValidationCode } from "./errors";
 import { isUuid } from "./ids";
 
+/**
+ * Who a Task is open to. A fact about the work, never about the person
+ * claiming it: Khair stores no gender for anybody and asks for none, so this
+ * is a statement the public pages make and not a filter they apply. See
+ * ticket 17 for why the alternative was refused.
+ */
+export const openToValues = ["anyone", "brothers", "sisters"] as const;
+export type OpenTo = (typeof openToValues)[number];
+
+export function isOpenTo(value: unknown): value is OpenTo {
+  return typeof value === "string" && (openToValues as readonly string[]).includes(value);
+}
+
 export type Task = {
   id: string;
   title: string;
   description: string;
   location: string;
+  /** Who the work is for. `anyone` unless the Admin said otherwise. */
+  openTo: OpenTo;
   /** Present on a fixed Task, absent on a flexible one. */
   startsAt: Date | null;
   /** The Deadline. Always present. */
@@ -47,6 +62,7 @@ export type PublishTaskInput = {
   title: string;
   description?: string;
   location?: string;
+  openTo?: OpenTo;
   startsAt?: Date | null;
   dueBy: Date;
   slotsNeeded?: number;
@@ -57,6 +73,7 @@ type TaskRow = {
   title: string;
   description: string;
   location: string;
+  open_to: OpenTo;
   starts_at: Date | null;
   due_by: Date;
   slots_needed: number;
@@ -70,6 +87,7 @@ function toTask(row: TaskRow): Task {
     title: row.title,
     description: row.description,
     location: row.location,
+    openTo: row.open_to,
     startsAt: row.starts_at,
     dueBy: row.due_by,
     slotsNeeded: row.slots_needed,
@@ -86,6 +104,19 @@ function requireValidDate(
 ): Date {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
     throw new ValidationError(field, code, `${label} is required.`);
+  }
+  return value;
+}
+
+/**
+ * Defaults to `anyone`, so a Task the Admin says nothing about is open to
+ * everybody, and refuses anything outside the three rather than silently
+ * widening a Task that was meant for the sisters.
+ */
+function requireOpenTo(value: PublishTaskInput["openTo"]): OpenTo {
+  if (value === undefined || value === null) return "anyone";
+  if (!isOpenTo(value)) {
+    throw new ValidationError("openTo", "open_to_invalid", "That is not a choice on this form.");
   }
   return value;
 }
@@ -113,14 +144,17 @@ export async function publishTask(input: PublishTaskInput): Promise<Task> {
     throw new ValidationError("slotsNeeded", "slots_too_few", "At least one helper is needed.");
   }
 
+  const openTo = requireOpenTo(input.openTo);
+
   const { rows } = await db().query<TaskRow>(
-    `insert into tasks (title, description, location, starts_at, due_by, slots_needed)
-     values ($1, $2, $3, $4, $5, $6)
+    `insert into tasks (title, description, location, open_to, starts_at, due_by, slots_needed)
+     values ($1, $2, $3, $4, $5, $6, $7)
      returning *`,
     [
       title,
       (input.description ?? "").trim(),
       (input.location ?? "").trim(),
+      openTo,
       startsAt,
       dueBy,
       slotsNeeded,
@@ -279,6 +313,8 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
     throw new ValidationError("slotsNeeded", "slots_too_few", "At least one helper is needed.");
   }
 
+  const openTo = requireOpenTo(input.openTo);
+
   return inTransaction(async (client) => {
     const { rows: locked } = await client.query<{ id: string }>(
       "select id from tasks where id = $1 for update",
@@ -301,8 +337,8 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
 
     const { rows } = await client.query<TaskRow>(
       `update tasks
-          set title = $2, description = $3, location = $4,
-              starts_at = $5, due_by = $6, slots_needed = $7
+          set title = $2, description = $3, location = $4, open_to = $5,
+              starts_at = $6, due_by = $7, slots_needed = $8
         where id = $1
         returning *`,
       [
@@ -310,6 +346,7 @@ export async function editTask(id: string, input: PublishTaskInput): Promise<Tas
         title,
         (input.description ?? "").trim(),
         (input.location ?? "").trim(),
+        openTo,
         startsAt,
         dueBy,
         slotsNeeded,

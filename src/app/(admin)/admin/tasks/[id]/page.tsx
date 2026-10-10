@@ -75,6 +75,12 @@ export default async function AdminTaskDetail({
             <dd>{task.location}</dd>
           </div>
         ) : null}
+        {task.openTo === "anyone" ? null : (
+          <div>
+            <dt>Who it is for</dt>
+            <dd>{task.openTo === "brothers" ? "Brothers" : "Sisters"}</dd>
+          </div>
+        )}
         <div>
           <dt>Deadline</dt>
           <dd>{formatShortDate(task.dueBy, "en", timeZone)}</dd>

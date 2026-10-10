@@ -1,4 +1,19 @@
+import type { OpenTo } from "@/core/tasks";
 import { formattingLocale, type Locale } from "@/i18n/config";
+import type { Messages } from "@/i18n/messages";
+
+/**
+ * "Sisters" - who a Task is open to, or null when it is open to anyone.
+ *
+ * Null rather than a word for "anyone", because a page that labels every
+ * Task makes the label worth nothing: the two that matter should be the only
+ * two that say anything.
+ */
+export function openToLabel(openTo: OpenTo, m: Messages): string | null {
+  if (openTo === "brothers") return m.openToBrothers;
+  if (openTo === "sisters") return m.openToSisters;
+  return null;
+}
 
 /** "Friday 17 October" - the agenda's day heading. */
 export function formatDayHeading(date: Date, locale: Locale, timeZone: string): string {

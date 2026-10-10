@@ -11,6 +11,7 @@ function task(overrides: Partial<OpenTask> & { id: string }): OpenTask {
     title: "Task",
     description: "",
     location: "",
+    openTo: "anyone",
     slotsNeeded: 1,
     closed: false,
     createdAt: new Date("2026-10-01T00:00:00Z"),

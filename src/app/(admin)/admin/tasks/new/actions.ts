@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ADMIN_COOKIE, sessionIsValid } from "@/core/admin";
 import { publishTask } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
-import { describeFailure, readSlotsNeeded, readTaskForm, resolveTaskTimes } from "../form-logic";
+import { describeFailure, readOpenTo, readSlotsNeeded, readTaskForm, resolveTaskTimes } from "../form-logic";
 import type { TaskFormState } from "../form-state";
 
 export async function publishTaskAction(
@@ -24,6 +24,7 @@ export async function publishTaskAction(
       title: values.title,
       description: values.description,
       location: values.location,
+      openTo: readOpenTo(values),
       startsAt: times.startsAt,
       dueBy: times.dueBy,
       slotsNeeded: readSlotsNeeded(values),

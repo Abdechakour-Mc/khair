@@ -23,6 +23,12 @@ One unit of the help a Task needs. A Task needing three helpers has three
 Slots; when all are claimed the Task is full and accepts no more Signups.
 _Avoid_: Spot, place, capacity, seat
 
+**Open To**:
+Who a Task is open to: anyone, the brothers, or the sisters. A fact about the
+work and never about the person claiming it, so Khair holds no gender for any
+Volunteer and asks for none. The pages state it; nothing enforces it.
+_Avoid_: Gender, sex, restriction, eligibility, requirement
+
 ### People
 
 **Volunteer**:

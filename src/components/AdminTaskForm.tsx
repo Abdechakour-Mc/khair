@@ -79,6 +79,23 @@ export function AdminTaskForm({
         />
       </div>
 
+      {/* A fact about the work, not about anybody claiming it: Khair stores
+          no gender for any volunteer and asks for none. The public page says
+          who the work is for and claiming is on trust. */}
+      <div className="field">
+        <label htmlFor="openTo">Who it is for</label>
+        <select id="openTo" name="openTo" defaultValue={v?.openTo || "anyone"}>
+          <option value="anyone">Anyone</option>
+          <option value="brothers">Brothers</option>
+          <option value="sisters">Sisters</option>
+        </select>
+        <p className="hint">
+          Shown on the public page. Leave it as anyone unless the work really needs one or
+          the other.
+        </p>
+        {problemFor("openTo") ? <p className="problem">{problemFor("openTo")}</p> : null}
+      </div>
+
       <div className="field">
         <label htmlFor="startsAt">Date and time</label>
         <input

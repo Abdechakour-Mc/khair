@@ -58,6 +58,11 @@ export default async function AdminTaskList() {
                 <span className={task.isFull ? "spots covered" : "spots"}>
                   {task.slotsTaken} of {task.slotsNeeded}
                 </span>
+                {task.openTo === "anyone" ? null : (
+                  <span className="spots audience">
+                    {task.openTo === "brothers" ? "Brothers" : "Sisters"}
+                  </span>
+                )}
                 {task.closed ? <span className="spots covered">Closed</span> : null}
               </div>
               <p className="detail">

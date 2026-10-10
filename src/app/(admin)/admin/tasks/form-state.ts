@@ -7,6 +7,8 @@ export type TaskFormValues = {
   title: string;
   description: string;
   location: string;
+  /** One of the Task's `openTo` values. Empty means the Admin left it alone. */
+  openTo: string;
   startsAt: string;
   dueBy: string;
   slotsNeeded: string;

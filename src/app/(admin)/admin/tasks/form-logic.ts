@@ -1,4 +1,5 @@
 import { ConflictError, ValidationError } from "@/core/errors";
+import type { OpenTo } from "@/core/tasks";
 import { parseWallTimeInZone } from "@/core/time";
 import type { TaskFormState, TaskFormValues } from "./form-state";
 
@@ -17,6 +18,7 @@ export const TASK_PROBLEMS: Record<string, string> = {
   start_after_deadline: "The start time is after the deadline.",
   slots_too_few: "At least one helper is needed.",
   slots_below_claimed: "More people have already claimed a spot than that.",
+  open_to_invalid: "Choose who the task is for.",
   task_missing: "That task no longer exists.",
   unknown: "Something went wrong. Nothing was saved.",
 };
@@ -26,10 +28,20 @@ export function readTaskForm(formData: FormData): TaskFormValues {
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
     location: String(formData.get("location") ?? ""),
+    openTo: String(formData.get("openTo") ?? ""),
     startsAt: String(formData.get("startsAt") ?? ""),
     dueBy: String(formData.get("dueBy") ?? ""),
     slotsNeeded: String(formData.get("slotsNeeded") ?? "1"),
   };
+}
+
+/**
+ * Left for the core to check rather than corrected here: a tampered value
+ * should come back as the same ValidationError as any other bad field, not be
+ * quietly widened to `anyone` on a Task that was meant for the sisters.
+ */
+export function readOpenTo(values: TaskFormValues): OpenTo | undefined {
+  return values.openTo.trim() === "" ? undefined : (values.openTo as OpenTo);
 }
 
 export function readSlotsNeeded(values: TaskFormValues): number {

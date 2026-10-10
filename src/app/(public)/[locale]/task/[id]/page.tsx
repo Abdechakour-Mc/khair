@@ -3,7 +3,7 @@ import { SignupForm } from "@/components/SignupForm";
 import { getTaskWithSlots } from "@/core/tasks";
 import { appTimeZone, isLocale } from "@/i18n/config";
 import { messages } from "@/i18n/messages";
-import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
+import { formatDayHeading, formatShortDate, formatTime, openToLabel } from "@/view/format";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +21,7 @@ export default async function TaskDetail({
   const m = messages[locale];
   const timeZone = appTimeZone();
 
+  const audience = openToLabel(task.openTo, m);
   const deadlinePassed = task.dueBy.getTime() <= Date.now();
   const when = task.startsAt
     ? `${formatDayHeading(task.startsAt, locale, timeZone)}, ${formatTime(task.startsAt, locale, timeZone)}`
@@ -51,6 +52,12 @@ export default async function TaskDetail({
           <div>
             <dt>{m.whereLabel}</dt>
             <dd>{task.location}</dd>
+          </div>
+        ) : null}
+        {audience ? (
+          <div>
+            <dt>{m.openToLabel}</dt>
+            <dd>{audience}</dd>
           </div>
         ) : null}
         <div>

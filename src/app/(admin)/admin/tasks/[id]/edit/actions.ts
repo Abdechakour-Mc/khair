@@ -7,6 +7,7 @@ import { editTask } from "@/core/tasks";
 import { appTimeZone } from "@/i18n/config";
 import {
   describeFailure,
+  readOpenTo,
   readSlotsNeeded,
   readTaskForm,
   resolveTaskTimes,
@@ -30,6 +31,7 @@ export async function editTaskAction(
       title: values.title,
       description: values.description,
       location: values.location,
+      openTo: readOpenTo(values),
       startsAt: times.startsAt,
       dueBy: times.dueBy,
       slotsNeeded: readSlotsNeeded(values),

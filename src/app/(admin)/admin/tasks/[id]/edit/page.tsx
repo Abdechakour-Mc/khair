@@ -38,6 +38,7 @@ export default async function EditTask({ params }: { params: Promise<{ id: strin
           title: task.title,
           description: task.description,
           location: task.location,
+          openTo: task.openTo,
           startsAt: task.startsAt ? formatWallTimeInZone(task.startsAt, timeZone) : "",
           dueBy: formatWallTimeInZone(task.dueBy, timeZone),
           slotsNeeded: String(task.slotsNeeded),

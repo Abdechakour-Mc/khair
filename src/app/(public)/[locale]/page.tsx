@@ -3,7 +3,7 @@ import { listOpenTasks, type OpenTask } from "@/core/tasks";
 import { appTimeZone, isLocale, type Locale } from "@/i18n/config";
 import { messages, type Messages } from "@/i18n/messages";
 import { groupIntoAgenda } from "@/view/agenda";
-import { formatDayHeading, formatShortDate, formatTime } from "@/view/format";
+import { formatDayHeading, formatShortDate, formatTime, openToLabel } from "@/view/format";
 
 // The list depends on the current moment, so it is never cached.
 export const dynamic = "force-dynamic";
@@ -71,6 +71,7 @@ function Slot({
   const when = task.startsAt
     ? formatTime(task.startsAt, locale, timeZone)
     : m.before(formatShortDate(task.dueBy, locale, timeZone));
+  const audience = openToLabel(task.openTo, m);
 
   return (
     <article className="slot">
@@ -80,6 +81,9 @@ function Slot({
           <span className={task.isFull ? "spots covered" : "spots"}>
             {task.isFull ? m.fullyCovered : m.spotsLeft(task.slotsRemaining)}
           </span>
+          {/* Said before anybody taps through, because finding out on the
+              task page that the work was not for you wastes the trip. */}
+          {audience ? <span className="spots audience">{audience}</span> : null}
         </div>
         <p className="detail">
           <span className="when">{when}</span>
