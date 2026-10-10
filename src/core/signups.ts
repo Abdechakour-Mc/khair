@@ -155,7 +155,15 @@ export async function claimSlot(input: ClaimSlotInput): Promise<Signup> {
         await client.query("release savepoint claim_attempt");
         return toSignup(row);
       } catch (error) {
-        await client.query("rollback to savepoint claim_attempt");
+        try {
+          await client.query("rollback to savepoint claim_attempt");
+        } catch {
+          // The same trap as the unguarded rollback in `inTransaction`: when
+          // the connection has dropped this throws too, and letting it would
+          // replace the real cause with a less useful one. Swallowed, so
+          // `error` is what the caller sees; a retry below would then fail on
+          // its own savepoint, which is correct for a dead connection.
+        }
 
         if ((error as { code?: string }).code !== UNIQUE_VIOLATION) throw error;
 
