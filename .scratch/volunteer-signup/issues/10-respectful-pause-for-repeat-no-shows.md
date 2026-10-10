@@ -14,10 +14,12 @@ ticket 07 may already be enough for the Admin to act as a human, and a
 conversation is usually the better instrument than a mechanism. Build it, then
 ask whether the Admin actually reaches for it.
 
-The user has since asked for admin moderation including bans. A pause and a
-ban are not the same act, and "never a public ban" was in the original brief:
-see the Moderation section of ticket 16 for the question that needs settling
-before anything harder than this pause is built.
+The user asked for admin moderation including bans, then asked for whatever
+standard practice recommends. That resolves in favour of this pause:
+graduated, private, reversible and audited is the conventional moderation
+ladder, and a single ban switch is the pattern moderation teams move away
+from. See the Moderation section of ticket 16. This pause is the ordinary
+tool; add an audit record of each pause and lift.
 
 **Blocked by:** 09.
 
