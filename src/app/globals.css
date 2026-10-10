@@ -936,13 +936,18 @@ section + section .day-heading,
    Each text is in the DOM throughout, so a screen reader reads all three.
    That is the right outcome here: they are three equally true mottos rather
    than a carousel of different content. */
+/* At the top of the page now rather than at the foot, so it reads as the
+   mosque speaking before the list does. Tinted rather than white, so it is
+   plainly a banner and not the first card in the list, and tighter than it
+   was as a footer, because everything below it is the reason somebody
+   came. */
 .motto {
   display: grid;
   grid-template-areas: "motto";
-  margin-block-start: var(--space-8);
-  padding: var(--space-6) var(--space-5);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  margin-block-start: var(--space-5);
+  padding: var(--space-5);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
   border-radius: var(--radius-panel);
   text-align: center;
 }
@@ -961,8 +966,8 @@ section + section .day-heading,
 
 .motto-arabic {
   margin: 0;
-  font-size: 20px;
-  line-height: 1.85;
+  font-size: 19px;
+  line-height: 1.8;
   color: var(--ink);
 }
 

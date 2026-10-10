@@ -71,9 +71,10 @@ export default async function LocaleLayout({
             </a>
             <LocaleSwitcher current={locale} label={m.languageLabel} />
           </header>
-          {children}
-
-          {/* Why the app exists, in three texts that take turns.
+          {/* Why the app exists, in three texts that take turns. Above the page
+              rather than below it: it is the first thing somebody sees after
+              scanning a poster, and it says what the mosque is asking of them
+              before the list does.
               
               CSS only: everything else on these pages works with scripting
               switched off and a motto is the last thing that should be the
@@ -81,7 +82,7 @@ export default async function LocaleLayout({
               grows nor moves the list above it, and the first is visible as
               the plain unanimated state, so where there is no animation
               there is still a motto. */}
-          <footer className="motto">
+          <aside className="motto">
             {mottos[locale].map((motto, index) => (
               <blockquote
                 className="motto-item"
@@ -95,7 +96,9 @@ export default async function LocaleLayout({
                 <cite className="motto-source">{motto.source}</cite>
               </blockquote>
             ))}
-          </footer>
+          </aside>
+
+          {children}
         </div>
       </body>
     </html>

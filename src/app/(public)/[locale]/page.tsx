@@ -29,7 +29,6 @@ export default async function PublicTaskList({
     <>
       <div className="masthead">
         <h1>{m.pageTitle}</h1>
-        <p>{m.pageIntro}</p>
       </div>
 
       {/* For somebody who closed the tab. Quiet, because it is the exception
